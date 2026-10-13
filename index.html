@@ -305,6 +305,15 @@ function makeLiveApi() {
       const { data, error } = await sb.from("slots").select("*").gte("work_date", ymd(y, m, 1)).lte("work_date", ymd(y, m, daysIn(y, m)));
       if (error) throw error; return data;
     },
+    async loadRange(from, to) {
+      const out = []; const step = 1000;
+      for (let i = 0; ; i += step) {
+        const { data, error } = await sb.from("slots").select("*").gte("work_date", from).lte("work_date", to)
+          .not("staff_id", "is", null).order("work_date").order("id").range(i, i + step - 1);
+        if (error) throw error; out.push(...data); if (data.length < step) break;
+      }
+      return out;
+    },
     async rpc(name, args) {
       const { data, error } = await sb.rpc(name, args);
       if (error) throw new Error(error.message); return data;
@@ -352,6 +361,7 @@ function makeDemoApi() {
     async session() { return { user: { id: "demo", user_metadata: { name: "Peem (LINE)" } } }; },
     async loadBase() { return { channels: D.channels, shifts: D.shifts, staff: D.staff }; },
     async loadMonth(y, m) { const p = `${y}-${pad(m)}-`; return D.slots.filter(s => s.work_date.startsWith(p)).map(s => ({ ...s })); },
+    async loadRange(from, to) { return D.slots.filter(s => s.staff_id && s.work_date >= from && s.work_date <= to).map(s => ({ ...s })); },
     async rpc(name, args) { await new Promise(r => setTimeout(r, 250)); return fns[name](args || {}); },
     subscribe(onEvt, onStatus) { listener = onEvt; setTimeout(() => onStatus(true), 400); },
     async signOut() { location.href = location.pathname; }
@@ -668,7 +678,23 @@ function renderAdmin(body) {
       <div class="info">${s.auth_user_id ? `✓ ${esc(s.line_display_name || "ผูก LINE แล้ว")}` : "ยังไม่ผูก LINE"}${s.role === "admin" ? " · <b>แอดมิน</b>" : ""}</div>
       <button class="btn sm" data-es="${s.id}">แก้ไข</button></div>`).join("")}</div></div>
   <div class="panel"><div class="panel-h"><h3>ตารางเดือน</h3></div><div style="padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <button class="btn" id="gen">เติมช่องที่ยังไม่มีของ ${TH_MONTHS[S.m - 1]} ${S.y + 543}</button><span class="note" style="margin:0">สร้างช่องสถานะ "ว่าง" ให้ทุกวัน/ทุกกะที่ยังไม่มี (ช่องเดิมไม่ถูกแก้)</span></div></div>`;
+    <button class="btn" id="gen">เติมช่องที่ยังไม่มีของ ${TH_MONTHS[S.m - 1]} ${S.y + 543}</button><span class="note" style="margin:0">สร้างช่องสถานะ "ว่าง" ให้ทุกวัน/ทุกกะที่ยังไม่มี (ช่องเดิมไม่ถูกแก้)</span></div></div>
+  <div class="panel"><div class="panel-h"><h3>Export ข้อมูลทำเงินเดือน</h3><span class="sub">ไฟล์ Excel: สรุปรายคน + รายละเอียดทุกกะ</span></div>
+    <div style="padding:14px 16px">
+      <div class="seg" style="margin-bottom:12px"><button data-xr="a">1–15 ${TH_MON_S[S.m - 1]}</button><button data-xr="b">16–${daysIn(S.y, S.m)} ${TH_MON_S[S.m - 1]}</button><button data-xr="all">ทั้งเดือน</button></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <label class="field" style="flex:1;min-width:140px">ตั้งแต่วันที่<input type="date" id="xFrom" value="${ymd(S.y, S.m, 1)}" style="border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px"></label>
+        <label class="field" style="flex:1;min-width:140px">ถึงวันที่<input type="date" id="xTo" value="${ymd(S.y, S.m, daysIn(S.y, S.m))}" style="border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px"></label>
+      </div>
+      <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="xPend"> รวมกะที่ยังรออนุมัติ (ปกติไม่รวม)</label>
+      <div><button class="btn pri" id="xGo">⬇ ดาวน์โหลด Excel</button></div>
+      <div class="note">ชั่วโมงคำนวณจากเวลากะ เช่น 17.00-05.00 = 12 ชม. (ข้ามคืน) · ถ้าเปิดในแอป LINE แล้วดาวน์โหลดไม่ได้ ให้เปิดลิงก์เว็บใน Chrome/Safari บนคอมพิวเตอร์</div>
+    </div></div>`;
+  body.querySelectorAll("[data-xr]").forEach(b => b.onclick = () => {
+    const n = daysIn(S.y, S.m); const r = { a: [1, 15], b: [16, n], all: [1, n] }[b.dataset.xr];
+    $("#xFrom").value = ymd(S.y, S.m, r[0]); $("#xTo").value = ymd(S.y, S.m, r[1]);
+  });
+  $("#xGo").onclick = () => exportPayroll($("#xFrom").value, $("#xTo").value, $("#xPend").checked);
   body.querySelectorAll("[data-ap]").forEach(b => b.onclick = () => review(+b.dataset.ap, true));
   body.querySelectorAll("[data-rj]").forEach(b => b.onclick = () => review(+b.dataset.rj, false));
   body.querySelectorAll("[data-es]").forEach(b => b.onclick = () => editStaff(b.dataset.es));
@@ -678,6 +704,54 @@ function renderAdmin(body) {
     openSheet(`<h3>อนุมัติทั้งหมด ${pend.length} รายการ?</h3><p class="lead">ทุกคำขอที่รออยู่จะถูกยืนยันลงตาราง</p><div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn go" id="ok">อนุมัติทั้งหมด</button></div>`);
     $("#ok").onclick = async () => { $("#ok").disabled = true; let ok = 0; for (const s of pend) { try { await API.rpc("admin_review", { p_slot_id: s.id, p_approve: true }); ok++; } catch (e) {} } closeSheet(); toast(`อนุมัติแล้ว ${ok} รายการ`, "ok"); loadMonth(true); };
   };
+}
+
+/* ===== Payroll export ===== */
+function shiftHours(label) {
+  const m = String(label).match(/(\d{1,2})[.:](\d{2})\s*-\s*(\d{1,2})[.:](\d{2})/); if (!m) return { start: "", end: "", h: 0 };
+  const a = +m[1] * 60 + +m[2]; let b = +m[3] * 60 + +m[4]; if (b <= a) b += 24 * 60;
+  return { start: `${m[1]}.${m[2]}`, end: `${m[3]}.${m[4]}`, h: Math.round((b - a) / 60 * 100) / 100 };
+}
+function loadXLSX() {
+  return new Promise((res, rej) => {
+    if (window.XLSX) return res();
+    const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    s.onload = res; s.onerror = () => rej(new Error("โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ")); document.head.appendChild(s);
+  });
+}
+async function exportPayroll(from, to, inclPending) {
+  if (!from || !to || from > to) return toast("ช่วงวันที่ไม่ถูกต้อง", "err");
+  const btn = $("#xGo"); btn.disabled = true; btn.textContent = "กำลังสร้างไฟล์…";
+  try {
+    const [rows] = await Promise.all([API.loadRange(from, to), loadXLSX()]);
+    const use = rows.filter(s => s.status === "approved" || (inclPending && s.status === "pending"));
+    if (!use.length) throw new Error("ไม่มีกะที่มีชื่อพนักงานในช่วงนี้");
+    const chans = [...S.channels].sort((a, b) => a.sort_order - b.sort_order);
+    const detail = use.map(s => {
+      const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id); const st = staffById(s.staff_id) || {}; const hh = shiftHours(sh.label); const p = parseD(s.work_date);
+      return { _ord: [s.work_date, c.sort_order, sh.sort_order], "วันที่": s.work_date, "วัน": WD[p.wd], "ช่อง": c.name, "กะ": sh.label, "เริ่ม": hh.start, "สิ้นสุด": hh.end, "ชั่วโมง": hh.h,
+        "พนักงาน": st.nickname || "?", "สถานะ": STATUS_TXT[s.status], "อนุมัติเมื่อ": s.approved_at ? new Date(s.approved_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }) : "" };
+    }).sort((x, y) => x._ord[0].localeCompare(y._ord[0]) || x._ord[1] - y._ord[1] || x._ord[2] - y._ord[2]).map(({ _ord, ...r }) => r);
+    const per = {};
+    for (const r of detail) {
+      const o = (per[r["พนักงาน"]] ||= { "พนักงาน": r["พนักงาน"], "จำนวนกะ": 0, "ชั่วโมงรวม": 0, _days: new Set() });
+      o["จำนวนกะ"]++; o["ชั่วโมงรวม"] += r["ชั่วโมง"]; o._days.add(r["วันที่"]);
+      o[`${r["ช่อง"]} (กะ)`] = (o[`${r["ช่อง"]} (กะ)`] || 0) + 1; o[`${r["ช่อง"]} (ชม.)`] = (o[`${r["ช่อง"]} (ชม.)`] || 0) + r["ชั่วโมง"];
+    }
+    const sum = Object.values(per).sort((a, b) => b["ชั่วโมงรวม"] - a["ชั่วโมงรวม"]).map(o => {
+      const r = { "พนักงาน": o["พนักงาน"], "จำนวนวันที่ทำงาน": o._days.size, "จำนวนกะ": o["จำนวนกะ"], "ชั่วโมงรวม": o["ชั่วโมงรวม"] };
+      for (const c of chans) { r[`${c.name} (กะ)`] = o[`${c.name} (กะ)`] || 0; r[`${c.name} (ชม.)`] = o[`${c.name} (ชม.)`] || 0; }
+      return r;
+    });
+    const wb = XLSX.utils.book_new();
+    const ws1 = XLSX.utils.json_to_sheet(sum); ws1["!cols"] = Object.keys(sum[0]).map(k => ({ wch: Math.max(10, k.length + 4) }));
+    const ws2 = XLSX.utils.json_to_sheet(detail); ws2["!cols"] = [12, 9, 16, 13, 7, 7, 8, 14, 12, 20].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws1, "สรุปรายคน");
+    XLSX.utils.book_append_sheet(wb, ws2, "รายละเอียดกะ");
+    XLSX.writeFile(wb, `ตารางไลฟ์_${from}_ถึง_${to}.xlsx`);
+    toast(`ดาวน์โหลดแล้ว ${detail.length} กะ / ${sum.length} คน`, "ok");
+  } catch (e) { toast(e.message, "err"); }
+  finally { btn.disabled = false; btn.textContent = "⬇ ดาวน์โหลด Excel"; }
 }
 
 async function review(id, approve) {
