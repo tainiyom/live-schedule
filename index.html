@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ตารางไลฟ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#f5f4f0; --surface:#ffffff; --surface-2:#faf9f6; --ink:#1d1b18; --ink-2:#55514a; --ink-3:#8a857c;
+  --line:#e6e2da; --line-2:#d6d1c6;
+  --accent:#06c755; --accent-ink:#ffffff; --accent-soft:#e3f8eb;
+  --open:#0a8f4a; --open-bg:#e6f6ec; --open-line:#9fdcb7;
+  --full:#6b7280; --full-bg:#eef0f2;
+  --closed:#a8a29e; --closed-bg:transparent;
+  --pending:#b45309; --pending-bg:#fff4e0; --pending-line:#f5c97a;
+  --danger:#d9342b; --danger-bg:#fdecea;
+  --shadow:0 1px 2px rgba(30,25,15,.06),0 4px 16px rgba(30,25,15,.06);
+  --r:12px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141412; --surface:#1d1c1a; --surface-2:#232220; --ink:#f1efe9; --ink-2:#b9b4aa; --ink-3:#8a857c;
+  --line:#2f2d29; --line-2:#3c3a35; --accent-soft:#11331f;
+  --open:#4fd18a; --open-bg:#143222; --open-line:#2d6b47; --full:#9aa1ab; --full-bg:#26282b;
+  --pending:#f3b45a; --pending-bg:#3a2a12; --pending-line:#7a5520; --danger:#ff6b61; --danger-bg:#3a1916;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#141412; --surface:#1d1c1a; --surface-2:#232220; --ink:#f1efe9; --ink-2:#b9b4aa; --ink-3:#8a857c;
+  --line:#2f2d29; --line-2:#3c3a35; --accent-soft:#11331f;
+  --open:#4fd18a; --open-bg:#143222; --open-line:#2d6b47; --full:#9aa1ab; --full-bg:#26282b;
+  --pending:#f3b45a; --pending-bg:#3a2a12; --pending-line:#7a5520; --danger:#ff6b61; --danger-bg:#3a1916;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans Thai",system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink-3);padding:3px 8px;border-radius:99px;background:var(--surface);border:1px solid var(--line)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.live.on i{background:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:pulse 2s infinite}
+.live.on{color:var(--open)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}70%{box-shadow:0 0 0 6px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.spacer{flex:1}
+.me{display:flex;align-items:center;gap:8px;border:0;background:none;padding:4px;border-radius:99px}
+.me img,.me .av{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--line)}
+.me .nm{font-weight:600;font-size:14px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me .rl{font-size:11px;color:var(--ink-3);display:block;line-height:1}
+
+.demo-bar{background:#1d1b18;color:#f5f4f0;font-size:13px}
+.demo-bar .wrap{display:flex;gap:12px;align-items:center;min-height:38px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.demo-bar label{display:flex;gap:6px;align-items:center}
+
+/* month + tabs */
+.head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 0 10px}
+.month{display:flex;align-items:center;gap:4px}
+.month h1{font-size:22px;margin:0 6px;letter-spacing:-.02em;font-weight:700;min-width:150px;text-align:center}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:16px}
+.icon-btn:hover{border-color:var(--line-2)}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;overflow-x:auto;max-width:100%}
+.tab{border:0;background:none;padding:7px 14px;border-radius:9px;font-weight:500;color:var(--ink-2);white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tab.on{background:var(--ink);color:var(--bg)}
+.badge{min-width:18px;height:18px;border-radius:99px;background:var(--pending);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center;padding:0 5px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:6px 0 16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat .k{font-size:12.5px;color:var(--ink-3);font-weight:500}
+.stat .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.stat .s{font-size:12px;color:var(--ink-3)}
+.stat.open .v{color:var(--open)} .stat.pend .v{color:var(--pending)}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:3px}
+.seg button{border:0;background:none;padding:5px 12px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.seg button.on{background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink-2);padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;user-select:none}
+.chk input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+
+/* legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3);margin:0 0 12px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend b{width:12px;height:12px;border-radius:4px;display:inline-block}
+
+/* date strip */
+.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.dchip{flex:0 0 auto;width:54px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 0 7px;text-align:center;scroll-snap-align:center;position:relative}
+.dchip .wd{font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:4px}
+.dchip .wd i{width:6px;height:6px;border-radius:50%}
+.dchip .dn{font-size:19px;font-weight:700;line-height:1.25}
+.dchip .oc{font-size:10.5px;color:var(--open);font-weight:600;height:15px}
+.dchip.past{opacity:.45}
+.dchip.today{border-color:var(--ink)}
+.dchip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dchip.on .oc{color:var(--accent)}
+
+/* day cards */
+.day-title{display:flex;align-items:baseline;gap:10px;margin:6px 0 10px}
+.day-title h2{margin:0;font-size:18px}
+.day-title .sub{color:var(--ink-3);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.card-h{padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.card-h .sw{width:10px;height:28px;border-radius:4px}
+.card-h .t{font-weight:700}
+.card-h .st{font-size:12px;color:var(--ink-3)}
+.srow{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line)}
+.srow:first-of-type{border-top:0}
+.srow .tm{font-weight:600;font-size:14px;width:96px;flex:0 0 auto}
+.srow .sl{flex:1;display:flex;justify-content:flex-end}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:96px;max-width:100%;height:30px;padding:0 12px;border-radius:99px;font-size:13.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;transition:transform .08s}
+button.pill:active{transform:scale(.97)}
+.p-open{background:var(--open-bg);color:var(--open);border-color:var(--open-line)}
+button.p-open:hover{background:var(--open);color:#fff}
+.p-full{background:var(--full-bg);color:var(--full)}
+.p-closed{color:var(--closed);border:1px dashed var(--line-2);font-weight:500}
+.p-pend{background:var(--pending-bg);color:var(--pending);border:1px dashed var(--pending-line)}
+.p-name{box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.p-mine{outline:2px solid var(--ink);outline-offset:1px}
+.pill.past{opacity:.55}
+.pill small{font-weight:500;font-size:11px;opacity:.85}
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 var(--accent)}20%{box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}
+
+/* grid view */
+.gridwrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);max-height:calc(100vh - 150px);box-shadow:var(--shadow)}
+table.g{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+table.g th,table.g td{padding:4px 5px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center}
+table.g thead th{position:sticky;background:var(--surface);z-index:2}
+table.g thead tr.r1 th{top:0;height:34px;font-size:13.5px}
+table.g thead tr.r2 th{top:34px;font-weight:600;font-size:12px;color:var(--ink-2);background:var(--surface-2)}
+table.g th.ch{color:#1d1b18;border-left:3px solid var(--surface)}
+table.g td.first,table.g th.first{position:sticky;left:0;background:var(--surface);z-index:3;text-align:left;padding-left:10px;border-right:1px solid var(--line)}
+table.g thead th.first{z-index:4}
+table.g td.cl{border-left:3px solid var(--surface)}
+table.g tr.past td{opacity:.5}
+table.g tr.today td.first{box-shadow:inset 3px 0 0 var(--ink)}
+table.g .pill{min-width:84px;height:26px;font-size:12.5px;padding:0 9px}
+.dlab{display:flex;align-items:center;gap:8px;font-weight:600}
+.dlab .wdp{font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:99px;min-width:46px;text-align:center}
+
+/* lists */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.panel + .panel{margin-top:14px}
+.panel-h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-h h3{margin:0;font-size:16px}
+.panel-h .sub{color:var(--ink-3);font-size:13px}
+.li{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .when{width:62px;flex:0 0 auto;text-align:center}
+.li .when .d{font-size:20px;font-weight:700;line-height:1.1}
+.li .when .w{font-size:11.5px;font-weight:600}
+.li .what{flex:1;min-width:0}
+.li .what .a{font-weight:600}
+.li .what .b{font-size:13px;color:var(--ink-3)}
+.empty{padding:28px 16px;text-align:center;color:var(--ink-3)}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:7px 14px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{border-color:var(--ink-3)}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.go{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.warn{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:var(--danger-bg)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.lg{padding:12px 18px;font-size:16px;border-radius:12px;width:100%}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+
+/* summary bars */
+.bars{padding:8px 16px 14px}
+.bar{display:grid;grid-template-columns:110px 1fr 70px;gap:10px;align-items:center;padding:5px 0}
+.bar .n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{height:20px;background:var(--surface-2);border-radius:6px;overflow:hidden;display:flex}
+.bar .fill{height:100%;border-radius:6px 0 0 6px}
+.bar .fill.p{background:repeating-linear-gradient(45deg,var(--pending-line) 0 4px,transparent 4px 8px);border-radius:0}
+.bar .c{font-size:13.5px;text-align:right;font-weight:600}
+.bar .c small{color:var(--pending);font-weight:500}
+
+/* staff admin */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;padding:14px 16px}
+.scard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center}
+.scard .info{flex:1;min-width:0;font-size:12.5px;color:var(--ink-3)}
+.scard img{width:28px;height:28px;border-radius:50%}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(15,12,8,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+@media (min-width:640px){.scrim{align-items:center}}
+.sheet{background:var(--surface);width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.2);animation:up .2s ease-out;max-height:92vh;overflow:auto}
+@media (min-width:640px){.sheet{border-radius:18px}}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+.sheet h3{margin:0 0 4px;font-size:19px}
+.sheet .lead{color:var(--ink-3);margin:0 0 14px;font-size:14px}
+.ticket{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.ticket .tt{padding:10px 14px;font-weight:700;color:#1d1b18;display:flex;justify-content:space-between;gap:8px}
+.ticket dl{margin:0;padding:6px 14px 10px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14.5px}
+.ticket dt{color:var(--ink-3)}
+.ticket dd{margin:0;font-weight:600;text-align:right}
+.confirm-box{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);margin-bottom:14px;cursor:pointer;font-size:14px}
+.confirm-box input{width:20px;height:20px;accent-color:var(--accent);margin:1px 0 0;flex:0 0 auto}
+.steps{display:flex;gap:6px;margin:0 0 14px;font-size:12px;color:var(--ink-3)}
+.steps span{flex:1;border-top:3px solid var(--line);padding-top:5px}
+.steps span.on{border-color:var(--accent);color:var(--ink);font-weight:600}
+.btns{display:flex;gap:8px}
+.btns .btn{flex:1;padding:11px 14px;font-size:15px;border-radius:12px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;font-size:13.5px;color:var(--ink-2)}
+.field select,.field input[type=text]{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:9px 10px;font-size:15px}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}
+
+/* toast */
+.toasts{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 32px);max-width:420px;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);animation:up .2s;pointer-events:auto}
+.toast.err{background:var(--danger);color:#fff}
+.toast.ok{background:var(--open);color:#fff}
+
+/* login */
+.center{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login{width:100%;max-width:380px;text-align:center}
+.login .logo{width:64px;height:64px;border-radius:18px;margin:0 auto 16px;display:grid;place-items:center;background:var(--ink);color:var(--bg);font-size:28px;font-weight:700}
+.login h1{margin:0 0 6px;font-size:24px}
+.login p{color:var(--ink-3);margin:0 0 22px}
+.line-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;background:#06c755;color:#fff;font-weight:700;font-size:16px;padding:13px;border-radius:12px}
+.line-btn:hover{background:#05b34c}
+.line-btn svg{width:22px;height:22px}
+.namegrid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0 18px}
+.namegrid .pill{min-width:0;height:36px;font-size:15px;padding:0 16px;cursor:pointer}
+.small-link{font-size:13px;color:var(--ink-3);margin-top:18px;display:inline-block}
+.loader{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--ink);animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+main{padding-bottom:60px}
+</style>
+</head>
+<body>
+<div id="app"><div class="center"><div class="loader"></div></div></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ===== Config ===== */
+const SUPABASE_URL = "https://gexapkcuvultnrxiyvgd.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdleGFwa2N1dnVsdG5yeGl5dmdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MDQ1MzIsImV4cCI6MjEwNzQ4MDUzMn0.SQZfZ3NadKjUdo3GBoAxIjgBeA8KVwEALYNyn7oCAnA";
+const DEMO = new URLSearchParams(location.search).has("demo");
+const DEMO_DATA = {"staff":[{"id":"s0","nickname":"แก้ม","bg_color":"#d94fb5","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s1","nickname":"ต้อยติ่ง","bg_color":"#e6d3f2","fg_color":"#6a3d9a","role":"staff","active":true,"auth_user_id":null},{"id":"s2","nickname":"Pukkyy","bg_color":"#f8cfb4","fg_color":"#8a4b2a","role":"staff","active":true,"auth_user_id":null},{"id":"s3","nickname":"กะแต","bg_color":"#2453a6","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s4","nickname":"ลูกตาล","bg_color":"#6b1ff0","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s5","nickname":"พีม","bg_color":"#cfe3f5","fg_color":"#1f4e79","role":"staff","active":true,"auth_user_id":null},{"id":"s6","nickname":"DEAR","bg_color":"#f0b3e2","fg_color":"#5a1f4f","role":"staff","active":true,"auth_user_id":null},{"id":"s7","nickname":"แบม","bg_color":"#6b3a14","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s8","nickname":"RISA","bg_color":"#3a3a3a","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s9","nickname":"JASMIN","bg_color":"#4b2f80","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s10","nickname":"เก๊กฮวย","bg_color":"#fbe3a6","fg_color":"#7a5a00","role":"staff","active":true,"auth_user_id":null},{"id":"s11","nickname":"จั๊กจั่น","bg_color":"#7cf26a","fg_color":"#1b5e20","role":"staff","active":true,"auth_user_id":null},{"id":"s12","nickname":"NIGHT","bg_color":"#5fb3a3","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s13","nickname":"น้ำหวาน","bg_color":"#e83cc0","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s14","nickname":"อุ๋งอิ๋ง","bg_color":"#f1d8f1","fg_color":"#8e24aa","role":"staff","active":true,"auth_user_id":null},{"id":"s15","nickname":"มิน","bg_color":"#9c1f7a","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null}],"channels":[{"id":1,"code":"support","name":"ซัพพอตทีมไลฟ์","subtitle":null,"color":"#f7e94a","sort_order":0},{"id":2,"code":"kcm","name":"KCM","subtitle":"สำคัญมากที่สุด","color":"#f39b3a","sort_order":1},{"id":3,"code":"warawut","name":"warawut","subtitle":"ช่องดารา","color":"#f3c6f0","sort_order":2}],"shifts":[{"id":1,"channel_id":1,"label":"08.00-17.00","sort_order":0},{"id":2,"channel_id":1,"label":"23.00-08.00","sort_order":1},{"id":3,"channel_id":2,"label":"05.00-08.00","sort_order":0},{"id":4,"channel_id":2,"label":"05.00-17.00","sort_order":1},{"id":5,"channel_id":2,"label":"08.00-17.00","sort_order":2},{"id":6,"channel_id":2,"label":"17.00-05.00","sort_order":3},{"id":7,"channel_id":3,"label":"05.00-08.00","sort_order":0},{"id":8,"channel_id":3,"label":"05.00-17.00","sort_order":1},{"id":9,"channel_id":3,"label":"08.00-17.00","sort_order":2},{"id":10,"channel_id":3,"label":"17.00-05.00","sort_order":3}],"slots":[{"id":1,"work_date":"2026-10-12","shift_id":1,"status":"closed","staff_id":null},{"id":2,"work_date":"2026-10-12","shift_id":2,"status":"open","staff_id":null},{"id":3,"work_date":"2026-10-13","shift_id":1,"status":"closed","staff_id":null},{"id":4,"work_date":"2026-10-13","shift_id":2,"status":"open","staff_id":null},{"id":5,"work_date":"2026-10-14","shift_id":1,"status":"closed","staff_id":null},{"id":6,"work_date":"2026-10-14","shift_id":2,"status":"open","staff_id":null},{"id":7,"work_date":"2026-10-15","shift_id":1,"status":"closed","staff_id":null},{"id":8,"work_date":"2026-10-15","shift_id":2,"status":"open","staff_id":null},{"id":9,"work_date":"2026-10-16","shift_id":1,"status":"closed","staff_id":null},{"id":10,"work_date":"2026-10-16","shift_id":2,"status":"open","staff_id":null},{"id":11,"work_date":"2026-10-17","shift_id":1,"status":"closed","staff_id":null},{"id":12,"work_date":"2026-10-17","shift_id":2,"status":"open","staff_id":null},{"id":13,"work_date":"2026-10-18","shift_id":1,"status":"open","staff_id":null},{"id":14,"work_date":"2026-10-18","shift_id":2,"status":"approved","staff_id":"s0"},{"id":15,"work_date":"2026-10-19","shift_id":1,"status":"closed","staff_id":null},{"id":16,"work_date":"2026-10-19","shift_id":2,"status":"open","staff_id":null},{"id":17,"work_date":"2026-10-20","shift_id":1,"status":"closed","staff_id":null},{"id":18,"work_date":"2026-10-20","shift_id":2,"status":"open","staff_id":null},{"id":19,"work_date":"2026-10-21","shift_id":1,"status":"closed","staff_id":null},{"id":20,"work_date":"2026-10-21","shift_id":2,"status":"open","staff_id":null},{"id":21,"work_date":"2026-10-22","shift_id":1,"status":"closed","staff_id":null},{"id":22,"work_date":"2026-10-22","shift_id":2,"status":"open","staff_id":null},{"id":23,"work_date":"2026-10-23","shift_id":1,"status":"closed","staff_id":null},{"id":24,"work_date":"2026-10-23","shift_id":2,"status":"open","staff_id":null},{"id":25,"work_date":"2026-10-24","shift_id":1,"status":"closed","staff_id":null},{"id":26,"work_date":"2026-10-24","shift_id":2,"status":"open","staff_id":null},{"id":27,"work_date":"2026-10-25","shift_id":1,"status":"open","staff_id":null},{"id":28,"work_date":"2026-10-25","shift_id":2,"status":"approved","staff_id":"s0"},{"id":29,"work_date":"2026-10-26","shift_id":1,"status":"closed","staff_id":null},{"id":30,"work_date":"2026-10-26","shift_id":2,"status":"open","staff_id":null},{"id":31,"work_date":"2026-10-27","shift_id":1,"status":"closed","staff_id":null},{"id":32,"work_date":"2026-10-27","shift_id":2,"status":"open","staff_id":null},{"id":33,"work_date":"2026-10-28","shift_id":1,"status":"closed","staff_id":null},{"id":34,"work_date":"2026-10-28","shift_id":2,"status":"open","staff_id":null},{"id":35,"work_date":"2026-10-29","shift_id":1,"status":"closed","staff_id":null},{"id":36,"work_date":"2026-10-29","shift_id":2,"status":"open","staff_id":null},{"id":37,"work_date":"2026-10-30","shift_id":1,"status":"closed","staff_id":null},{"id":38,"work_date":"2026-10-30","shift_id":2,"status":"open","staff_id":null},{"id":39,"work_date":"2026-10-31","shift_id":1,"status":"closed","staff_id":null},{"id":40,"work_date":"2026-10-31","shift_id":2,"status":"open","staff_id":null},{"id":41,"work_date":"2026-10-12","shift_id":3,"status":"full","staff_id":null},{"id":42,"work_date":"2026-10-12","shift_id":4,"status":"approved","staff_id":"s1"},{"id":43,"work_date":"2026-10-12","shift_id":5,"status":"full","staff_id":null},{"id":44,"work_date":"2026-10-12","shift_id":6,"status":"approved","staff_id":"s0"},{"id":45,"work_date":"2026-10-13","shift_id":3,"status":"full","staff_id":null},{"id":46,"work_date":"2026-10-13","shift_id":4,"status":"approved","staff_id":"s1"},{"id":47,"work_date":"2026-10-13","shift_id":5,"status":"full","staff_id":null},{"id":48,"work_date":"2026-10-13","shift_id":6,"status":"approved","staff_id":"s0"},{"id":49,"work_date":"2026-10-14","shift_id":3,"status":"full","staff_id":null},{"id":50,"work_date":"2026-10-14","shift_id":4,"status":"approved","staff_id":"s1"},{"id":51,"work_date":"2026-10-14","shift_id":5,"status":"full","staff_id":null},{"id":52,"work_date":"2026-10-14","shift_id":6,"status":"approved","staff_id":"s0"},{"id":53,"work_date":"2026-10-15","shift_id":3,"status":"full","staff_id":null},{"id":54,"work_date":"2026-10-15","shift_id":4,"status":"approved","staff_id":"s1"},{"id":55,"work_date":"2026-10-15","shift_id":5,"status":"full","staff_id":null},{"id":56,"work_date":"2026-10-15","shift_id":6,"status":"approved","staff_id":"s0"},{"id":57,"work_date":"2026-10-16","shift_id":3,"status":"full","staff_id":null},{"id":58,"work_date":"2026-10-16","shift_id":4,"status":"approved","staff_id":"s1"},{"id":59,"work_date":"2026-10-16","shift_id":5,"status":"full","staff_id":null},{"id":60,"work_date":"2026-10-16","shift_id":6,"status":"approved","staff_id":"s0"},{"id":61,"work_date":"2026-10-17","shift_id":3,"status":"approved","staff_id":"s12"},{"id":62,"work_date":"2026-10-17","shift_id":4,"status":"full","staff_id":null},{"id":63,"work_date":"2026-10-17","shift_id":5,"status":"approved","staff_id":"s1"},{"id":64,"work_date":"2026-10-17","shift_id":6,"status":"approved","staff_id":"s2"},{"id":65,"work_date":"2026-10-18","shift_id":3,"status":"approved","staff_id":"s4"},{"id":66,"work_date":"2026-10-18","shift_id":4,"status":"full","staff_id":null},{"id":67,"work_date":"2026-10-18","shift_id":5,"status":"approved","staff_id":"s10"},{"id":68,"work_date":"2026-10-18","shift_id":6,"status":"approved","staff_id":"s2"},{"id":69,"work_date":"2026-10-19","shift_id":3,"status":"full","staff_id":null},{"id":70,"work_date":"2026-10-19","shift_id":4,"status":"approved","staff_id":"s1"},{"id":71,"work_date":"2026-10-19","shift_id":5,"status":"full","staff_id":null},{"id":72,"work_date":"2026-10-19","shift_id":6,"status":"approved","staff_id":"s0"},{"id":73,"work_date":"2026-10-20","shift_id":3,"status":"full","staff_id":null},{"id":74,"work_date":"2026-10-20","shift_id":4,"status":"approved","staff_id":"s1"},{"id":75,"work_date":"2026-10-20","shift_id":5,"status":"full","staff_id":null},{"id":76,"work_date":"2026-10-20","shift_id":6,"status":"approved","staff_id":"s0"},{"id":77,"work_date":"2026-10-21","shift_id":3,"status":"full","staff_id":null},{"id":78,"work_date":"2026-10-21","shift_id":4,"status":"approved","staff_id":"s1"},{"id":79,"work_date":"2026-10-21","shift_id":5,"status":"full","staff_id":null},{"id":80,"work_date":"2026-10-21","shift_id":6,"status":"approved","staff_id":"s0"},{"id":81,"work_date":"2026-10-22","shift_id":3,"status":"full","staff_id":null},{"id":82,"work_date":"2026-10-22","shift_id":4,"status":"approved","staff_id":"s1"},{"id":83,"work_date":"2026-10-22","shift_id":5,"status":"full","staff_id":null},{"id":84,"work_date":"2026-10-22","shift_id":6,"status":"approved","staff_id":"s0"},{"id":85,"work_date":"2026-10-23","shift_id":3,"status":"full","staff_id":null},{"id":86,"work_date":"2026-10-23","shift_id":4,"status":"approved","staff_id":"s1"},{"id":87,"work_date":"2026-10-23","shift_id":5,"status":"full","staff_id":null},{"id":88,"work_date":"2026-10-23","shift_id":6,"status":"approved","staff_id":"s0"},{"id":89,"work_date":"2026-10-24","shift_id":3,"status":"open","staff_id":null},{"id":90,"work_date":"2026-10-24","shift_id":4,"status":"full","staff_id":null},{"id":91,"work_date":"2026-10-24","shift_id":5,"status":"approved","staff_id":"s1"},{"id":92,"work_date":"2026-10-24","shift_id":6,"status":"approved","staff_id":"s2"},{"id":93,"work_date":"2026-10-25","shift_id":3,"status":"approved","staff_id":"s5"},{"id":94,"work_date":"2026-10-25","shift_id":4,"status":"full","staff_id":null},{"id":95,"work_date":"2026-10-25","shift_id":5,"status":"approved","staff_id":"s9"},{"id":96,"work_date":"2026-10-25","shift_id":6,"status":"open","staff_id":null},{"id":97,"work_date":"2026-10-26","shift_id":3,"status":"full","staff_id":null},{"id":98,"work_date":"2026-10-26","shift_id":4,"status":"approved","staff_id":"s1"},{"id":99,"work_date":"2026-10-26","shift_id":5,"status":"full","staff_id":null},{"id":100,"work_date":"2026-10-26","shift_id":6,"status":"approved","staff_id":"s0"},{"id":101,"work_date":"2026-10-27","shift_id":3,"status":"full","staff_id":null},{"id":102,"work_date":"2026-10-27","shift_id":4,"status":"approved","staff_id":"s1"},{"id":103,"work_date":"2026-10-27","shift_id":5,"status":"full","staff_id":null},{"id":104,"work_date":"2026-10-27","shift_id":6,"status":"approved","staff_id":"s0"},{"id":105,"work_date":"2026-10-28","shift_id":3,"status":"full","staff_id":null},{"id":106,"work_date":"2026-10-28","shift_id":4,"status":"approved","staff_id":"s1"},{"id":107,"work_date":"2026-10-28","shift_id":5,"status":"full","staff_id":null},{"id":108,"work_date":"2026-10-28","shift_id":6,"status":"approved","staff_id":"s0"},{"id":109,"work_date":"2026-10-29","shift_id":3,"status":"full","staff_id":null},{"id":110,"work_date":"2026-10-29","shift_id":4,"status":"approved","staff_id":"s1"},{"id":111,"work_date":"2026-10-29","shift_id":5,"status":"full","staff_id":null},{"id":112,"work_date":"2026-10-29","shift_id":6,"status":"approved","staff_id":"s0"},{"id":113,"work_date":"2026-10-30","shift_id":3,"status":"full","staff_id":null},{"id":114,"work_date":"2026-10-30","shift_id":4,"status":"approved","staff_id":"s1"},{"id":115,"work_date":"2026-10-30","shift_id":5,"status":"full","staff_id":null},{"id":116,"work_date":"2026-10-30","shift_id":6,"status":"approved","staff_id":"s0"},{"id":117,"work_date":"2026-10-31","shift_id":3,"status":"approved","staff_id":"s4"},{"id":118,"work_date":"2026-10-31","shift_id":4,"status":"full","staff_id":null},{"id":119,"work_date":"2026-10-31","shift_id":5,"status":"approved","staff_id":"s1"},{"id":120,"work_date":"2026-10-31","shift_id":6,"status":"approved","staff_id":"s3"},{"id":121,"work_date":"2026-10-12","shift_id":7,"status":"full","staff_id":null},{"id":122,"work_date":"2026-10-12","shift_id":8,"status":"approved","staff_id":"s10"},{"id":123,"work_date":"2026-10-12","shift_id":9,"status":"full","staff_id":null},{"id":124,"work_date":"2026-10-12","shift_id":10,"status":"approved","staff_id":"s3"},{"id":125,"work_date":"2026-10-13","shift_id":7,"status":"full","staff_id":null},{"id":126,"work_date":"2026-10-13","shift_id":8,"status":"approved","staff_id":"s10"},{"id":127,"work_date":"2026-10-13","shift_id":9,"status":"full","staff_id":null},{"id":128,"work_date":"2026-10-13","shift_id":10,"status":"approved","staff_id":"s2"},{"id":129,"work_date":"2026-10-14","shift_id":7,"status":"approved","staff_id":"s10"},{"id":130,"work_date":"2026-10-14","shift_id":8,"status":"full","staff_id":null},{"id":131,"work_date":"2026-10-14","shift_id":9,"status":"approved","staff_id":"s8"},{"id":132,"work_date":"2026-10-14","shift_id":10,"status":"approved","staff_id":"s2"},{"id":133,"work_date":"2026-10-15","shift_id":7,"status":"approved","staff_id":"s10"},{"id":134,"work_date":"2026-10-15","shift_id":8,"status":"full","staff_id":null},{"id":135,"work_date":"2026-10-15","shift_id":9,"status":"approved","staff_id":"s8"},{"id":136,"work_date":"2026-10-15","shift_id":10,"status":"approved","staff_id":"s2"},{"id":137,"work_date":"2026-10-16","shift_id":7,"status":"approved","staff_id":"s10"},{"id":138,"work_date":"2026-10-16","shift_id":8,"status":"full","staff_id":null},{"id":139,"work_date":"2026-10-16","shift_id":9,"status":"approved","staff_id":"s8"},{"id":140,"work_date":"2026-10-16","shift_id":10,"status":"approved","staff_id":"s3"},{"id":141,"work_date":"2026-10-17","shift_id":7,"status":"open","staff_id":null},{"id":142,"work_date":"2026-10-17","shift_id":8,"status":"full","staff_id":null},{"id":143,"work_date":"2026-10-17","shift_id":9,"status":"approved","staff_id":"s12"},{"id":144,"work_date":"2026-10-17","shift_id":10,"status":"approved","staff_id":"s11"},{"id":145,"work_date":"2026-10-18","shift_id":7,"status":"open","staff_id":null},{"id":146,"work_date":"2026-10-18","shift_id":8,"status":"full","staff_id":null},{"id":147,"work_date":"2026-10-18","shift_id":9,"status":"approved","staff_id":"s9"},{"id":148,"work_date":"2026-10-18","shift_id":10,"status":"open","staff_id":null},{"id":149,"work_date":"2026-10-19","shift_id":7,"status":"full","staff_id":null},{"id":150,"work_date":"2026-10-19","shift_id":8,"status":"approved","staff_id":"s10"},{"id":151,"work_date":"2026-10-19","shift_id":9,"status":"full","staff_id":null},{"id":152,"work_date":"2026-10-19","shift_id":10,"status":"approved","staff_id":"s2"},{"id":153,"work_date":"2026-10-20","shift_id":7,"status":"full","staff_id":null},{"id":154,"work_date":"2026-10-20","shift_id":8,"status":"approved","staff_id":"s10"},{"id":155,"work_date":"2026-10-20","shift_id":9,"status":"full","staff_id":null},{"id":156,"work_date":"2026-10-20","shift_id":10,"status":"approved","staff_id":"s2"},{"id":157,"work_date":"2026-10-21","shift_id":7,"status":"approved","staff_id":"s10"},{"id":158,"work_date":"2026-10-21","shift_id":8,"status":"full","staff_id":null},{"id":159,"work_date":"2026-10-21","shift_id":9,"status":"approved","staff_id":"s8"},{"id":160,"work_date":"2026-10-21","shift_id":10,"status":"approved","staff_id":"s2"},{"id":161,"work_date":"2026-10-22","shift_id":7,"status":"approved","staff_id":"s10"},{"id":162,"work_date":"2026-10-22","shift_id":8,"status":"full","staff_id":null},{"id":163,"work_date":"2026-10-22","shift_id":9,"status":"approved","staff_id":"s8"},{"id":164,"work_date":"2026-10-22","shift_id":10,"status":"approved","staff_id":"s2"},{"id":165,"work_date":"2026-10-23","shift_id":7,"status":"full","staff_id":null},{"id":166,"work_date":"2026-10-23","shift_id":8,"status":"approved","staff_id":"s4"},{"id":167,"work_date":"2026-10-23","shift_id":9,"status":"full","staff_id":null},{"id":168,"work_date":"2026-10-23","shift_id":10,"status":"approved","staff_id":"s2"},{"id":169,"work_date":"2026-10-24","shift_id":7,"status":"open","staff_id":null},{"id":170,"work_date":"2026-10-24","shift_id":8,"status":"full","staff_id":null},{"id":171,"work_date":"2026-10-24","shift_id":9,"status":"approved","staff_id":"s5"},{"id":172,"work_date":"2026-10-24","shift_id":10,"status":"approved","staff_id":"s15"},{"id":173,"work_date":"2026-10-25","shift_id":7,"status":"open","staff_id":null},{"id":174,"work_date":"2026-10-25","shift_id":8,"status":"full","staff_id":null},{"id":175,"work_date":"2026-10-25","shift_id":9,"status":"approved","staff_id":"s5"},{"id":176,"work_date":"2026-10-25","shift_id":10,"status":"open","staff_id":null},{"id":177,"work_date":"2026-10-26","shift_id":7,"status":"approved","staff_id":"s4"},{"id":178,"work_date":"2026-10-26","shift_id":8,"status":"full","staff_id":null},{"id":179,"work_date":"2026-10-26","shift_id":9,"status":"approved","staff_id":"s8"},{"id":180,"work_date":"2026-10-26","shift_id":10,"status":"open","staff_id":null},{"id":181,"work_date":"2026-10-27","shift_id":7,"status":"approved","staff_id":"s4"},{"id":182,"work_date":"2026-10-27","shift_id":8,"status":"full","staff_id":null},{"id":183,"work_date":"2026-10-27","shift_id":9,"status":"approved","staff_id":"s8"},{"id":184,"work_date":"2026-10-27","shift_id":10,"status":"open","staff_id":null},{"id":185,"work_date":"2026-10-28","shift_id":7,"status":"approved","staff_id":"s10"},{"id":186,"work_date":"2026-10-28","shift_id":8,"status":"full","staff_id":null},{"id":187,"work_date":"2026-10-28","shift_id":9,"status":"approved","staff_id":"s8"},{"id":188,"work_date":"2026-10-28","shift_id":10,"status":"approved","staff_id":"s2"},{"id":189,"work_date":"2026-10-29","shift_id":7,"status":"approved","staff_id":"s10"},{"id":190,"work_date":"2026-10-29","shift_id":8,"status":"full","staff_id":null},{"id":191,"work_date":"2026-10-29","shift_id":9,"status":"approved","staff_id":"s8"},{"id":192,"work_date":"2026-10-29","shift_id":10,"status":"approved","staff_id":"s2"},{"id":193,"work_date":"2026-10-30","shift_id":7,"status":"approved","staff_id":"s10"},{"id":194,"work_date":"2026-10-30","shift_id":8,"status":"full","staff_id":null},{"id":195,"work_date":"2026-10-30","shift_id":9,"status":"approved","staff_id":"s4"},{"id":196,"work_date":"2026-10-30","shift_id":10,"status":"approved","staff_id":"s3"},{"id":197,"work_date":"2026-10-31","shift_id":7,"status":"full","staff_id":null},{"id":198,"work_date":"2026-10-31","shift_id":8,"status":"approved","staff_id":"s5"},{"id":199,"work_date":"2026-10-31","shift_id":9,"status":"full","staff_id":null},{"id":200,"work_date":"2026-10-31","shift_id":10,"status":"approved","staff_id":"s2"}]};
+
+/* ===== Helpers ===== */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const TH_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const TH_MON_S = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const WD = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
+const WD_S = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+const WD_COLOR = ["#e5484d","#e8b10e","#e05aa8","#30a46c","#ef7d22","#3e8ed0","#7c5cc4"];
+const todayStr = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
+const pad = n => String(n).padStart(2, "0");
+const ymd = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
+const parseD = s => { const [y, m, d] = s.split("-").map(Number); return { y, m, d, wd: new Date(Date.UTC(y, m - 1, d)).getUTCDay() }; };
+const daysIn = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+const thDate = s => { const p = parseD(s); return `${WD[p.wd]} ${p.d} ${TH_MON_S[p.m - 1]} ${p.y + 543}`; };
+const STATUS_TXT = { open: "ว่าง", full: "เต็มแล้ว", closed: "ไม่รับคน", pending: "รออนุมัติ", approved: "อนุมัติแล้ว" };
+
+function toast(msg, type = "") {
+  const t = document.createElement("div"); t.className = "toast " + type; t.textContent = msg;
+  $("#toasts").appendChild(t); setTimeout(() => t.remove(), 3600);
+}
+
+/* ===== State ===== */
+const S = {
+  me: null, user: null, channels: [], shifts: [], staff: [], slots: new Map(),
+  y: 0, m: 0, sel: null, tab: "overview", view: matchMedia("(min-width:900px)").matches ? "grid" : "day",
+  onlyOpen: false, sumRange: "all", live: false, flash: new Set()
+};
+try { const v = localStorage.getItem("ls_view"); if (v) S.view = v; } catch (e) {}
+
+/* ===== API layer (live / demo) ===== */
+let sb = null;
+const API = DEMO ? makeDemoApi() : makeLiveApi();
+
+function makeLiveApi() {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+  return {
+    async config() { const { data } = await sb.rpc("get_public_config"); return data || {}; },
+    async session() { const { data } = await sb.auth.getSession(); return data.session; },
+    async loadBase() {
+      const [c, sh, st] = await Promise.all([
+        sb.from("channels").select("*").order("sort_order"),
+        sb.from("shifts").select("*").order("sort_order"),
+        sb.from("staff").select("*").order("nickname")]);
+      for (const r of [c, sh, st]) if (r.error) throw r.error;
+      return { channels: c.data, shifts: sh.data, staff: st.data };
+    },
+    async loadMonth(y, m) {
+      const { data, error } = await sb.from("slots").select("*").gte("work_date", ymd(y, m, 1)).lte("work_date", ymd(y, m, daysIn(y, m)));
+      if (error) throw error; return data;
+    },
+    async rpc(name, args) {
+      const { data, error } = await sb.rpc(name, args);
+      if (error) throw new Error(error.message); return data;
+    },
+    subscribe(onEvt, onStatus) {
+      sb.channel("live").on("postgres_changes", { event: "*", schema: "public", table: "slots" }, p => onEvt("slots", p))
+        .on("postgres_changes", { event: "*", schema: "public", table: "staff" }, p => onEvt("staff", p))
+        .subscribe(st => onStatus(st === "SUBSCRIBED"));
+    },
+    async signOut() { await sb.auth.signOut(); }
+  };
+}
+
+function makeDemoApi() {
+  const D = JSON.parse(JSON.stringify(DEMO_DATA));
+  const meId = D.staff.find(s => s.nickname === "พีม").id;
+  D.staff.forEach(s => { if (s.id === meId) { s.auth_user_id = "demo"; s.line_display_name = "Peem (LINE)"; } });
+  // a couple of pending requests to show the approval flow
+  const mk = (code, date, label, nick) => {
+    const ch = D.channels.find(c => c.code === code); const sh = D.shifts.find(s => s.channel_id === ch.id && s.label === label);
+    const sl = D.slots.find(x => x.shift_id === sh.id && x.work_date === date); sl.status = "pending"; sl.staff_id = D.staff.find(s => s.nickname === nick).id; sl.requested_at = new Date().toISOString();
+  };
+  mk("warawut", "2026-10-26", "17.00-05.00", "จั๊กจั่น"); mk("support", "2026-10-20", "23.00-08.00", "พีม");
+  let listener = null; const emit = (row, old) => listener && setTimeout(() => listener("slots", { eventType: "UPDATE", new: { ...row }, old }), 120);
+  const meRow = () => D.staff.find(s => s.id === meId);
+  const find = id => D.slots.find(s => s.id === id);
+  const fns = {
+    claim_staff() { return meRow(); },
+    request_booking({ p_slot_id }) { const s = find(p_slot_id); if (s.status !== "open") throw new Error("ช่องนี้ไม่ว่างแล้ว มีคนจองก่อนหน้า"); Object.assign(s, { status: "pending", staff_id: meId, requested_at: new Date().toISOString() }); emit(s); return s; },
+    cancel_booking({ p_slot_id }) { const s = find(p_slot_id); if (s.staff_id !== meId || s.status !== "pending") throw new Error("ยกเลิกได้เฉพาะรายการของตัวเองที่ยังรออนุมัติ"); Object.assign(s, { status: "open", staff_id: null }); emit(s); return s; },
+    admin_review({ p_slot_id, p_approve }) { if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); const s = find(p_slot_id); if (p_approve) Object.assign(s, { status: "approved", approved_by: meId }); else Object.assign(s, { status: "open", staff_id: null }); emit(s); return s; },
+    admin_set_slot({ p_slot_id, p_status, p_staff_id }) { if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); const s = find(p_slot_id); Object.assign(s, { status: p_status, staff_id: ["approved", "pending"].includes(p_status) ? p_staff_id : null }); emit(s); return s; },
+    admin_generate_month({ p_year, p_month }) {
+      let n = 0, id = Math.max(...D.slots.map(s => s.id)) + 1;
+      for (let d = 1; d <= daysIn(p_year, p_month); d++) for (const sh of D.shifts) {
+        const wd = ymd(p_year, p_month, d); if (!D.slots.some(s => s.work_date === wd && s.shift_id === sh.id)) { D.slots.push({ id: id++, work_date: wd, shift_id: sh.id, status: "open", staff_id: null }); n++; }
+      } return n;
+    },
+    admin_upsert_staff(a) { let r = a.p_id ? D.staff.find(s => s.id === a.p_id) : null; if (!r) { r = { id: "n" + Date.now(), auth_user_id: null, active: true }; D.staff.push(r); } Object.assign(r, { nickname: a.p_nickname ?? r.nickname, bg_color: a.p_bg ?? r.bg_color, fg_color: a.p_fg ?? r.fg_color, role: a.p_role ?? r.role, active: a.p_active ?? r.active }); return r; },
+    admin_unlink_staff({ p_id }) { const r = D.staff.find(s => s.id === p_id); r.auth_user_id = null; return r; }
+  };
+  return {
+    demoSetAdmin(on) { meRow().role = on ? "admin" : "staff"; },
+    async config() { return { liff_id: "demo" }; },
+    async session() { return { user: { id: "demo", user_metadata: { name: "Peem (LINE)" } } }; },
+    async loadBase() { return { channels: D.channels, shifts: D.shifts, staff: D.staff }; },
+    async loadMonth(y, m) { const p = `${y}-${pad(m)}-`; return D.slots.filter(s => s.work_date.startsWith(p)).map(s => ({ ...s })); },
+    async rpc(name, args) { await new Promise(r => setTimeout(r, 250)); return fns[name](args || {}); },
+    subscribe(onEvt, onStatus) { listener = onEvt; setTimeout(() => onStatus(true), 400); },
+    async signOut() { location.href = location.pathname; }
+  };
+}
+
+/* ===== LINE login (LIFF) ===== */
+let LIFF_ID = "";
+function loadLiff() {
+  return new Promise((res, rej) => {
+    if (window.liff) return res();
+    const s = document.createElement("script"); s.src = "https://static.line-scdn.net/liff/edge/2/sdk.js";
+    s.onload = res; s.onerror = () => rej(new Error("โหลด LINE SDK ไม่สำเร็จ")); document.head.appendChild(s);
+  });
+}
+async function lineExchange() {
+  const idToken = liff.getIDToken();
+  if (!idToken) throw new Error("ไม่ได้รับ ID token จาก LINE (ตรวจสอบว่าเปิด scope openid แล้ว)");
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/line-login`, {
+    method: "POST", headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    body: JSON.stringify({ id_token: idToken })
+  });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { liff.logout(); liff.login({ redirectUri: location.href.split("#")[0] }); throw new Error("กำลังเข้าสู่ระบบใหม่…"); }
+  if (!r.ok) throw new Error(j.error || "เข้าสู่ระบบไม่สำเร็จ");
+  const { error } = await sb.auth.setSession({ access_token: j.access_token, refresh_token: j.refresh_token });
+  if (error) throw error;
+}
+
+/* ===== Boot ===== */
+async function boot() {
+  try {
+    const cfg = await API.config(); LIFF_ID = cfg.liff_id || "";
+    let session = await API.session();
+    if (!session && !DEMO) {
+      if (!LIFF_ID) return renderLogin("ยังไม่ได้ตั้งค่า LINE Login — ผู้ดูแลต้องใส่ LIFF ID ก่อน");
+      await loadLiff(); await liff.init({ liffId: LIFF_ID });
+      if (liff.isLoggedIn()) { renderLoading("กำลังเข้าสู่ระบบด้วย LINE…"); await lineExchange(); session = await API.session(); }
+      else return renderLogin();
+    }
+    S.user = session.user;
+    await loadBase();
+    S.me = S.staff.find(s => s.auth_user_id === S.user.id) || null;
+    if (!S.me) return renderClaim();
+    startApp();
+  } catch (e) { console.error(e); renderLogin(e.message || String(e)); }
+}
+
+async function loadBase() {
+  const b = await API.loadBase(); S.channels = b.channels; S.shifts = b.shifts; S.staff = b.staff;
+}
+
+const LINE_ICON = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5C6.2 2.5 1.5 6.3 1.5 11c0 4.2 3.7 7.7 8.8 8.4.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.6 1.1-.5 6-3.5 8.2-6 1.5-1.7 2.3-3.4 2.3-5.3C22.5 6.3 17.8 2.5 12 2.5zM8.3 13.6H6.2c-.3 0-.6-.3-.6-.6V8.8c0-.3.3-.6.6-.6s.6.3.6.6v3.6h1.5c.3 0 .6.3.6.6s-.3.6-.6.6zm2.2-.6c0 .3-.3.6-.6.6s-.6-.3-.6-.6V8.8c0-.3.3-.6.6-.6s.6.3.6.6V13zm5 0c0 .3-.2.5-.4.6h-.2c-.2 0-.4-.1-.5-.2l-2.1-2.9V13c0 .3-.3.6-.6.6s-.6-.3-.6-.6V8.8c0-.3.2-.5.4-.6h.2c.2 0 .4.1.5.2l2.1 2.9V8.8c0-.3.3-.6.6-.6s.6.3.6.6V13zm3.4-2.7c.3 0 .6.3.6.6s-.3.6-.6.6h-1.5v.9h1.5c.3 0 .6.3.6.6s-.3.6-.6.6h-2.1c-.3 0-.6-.3-.6-.6V8.8c0-.3.3-.6.6-.6h2.1c.3 0 .6.3.6.6s-.3.6-.6.6h-1.5v.9h1.5z"/></svg>`;
+
+function renderLoading(msg) { $("#app").innerHTML = `<div class="center"><div class="login"><div class="loader"></div><p style="margin-top:14px">${esc(msg)}</p></div></div>`; }
+
+function renderLogin(err) {
+  $("#app").innerHTML = `<div class="center"><div class="login">
+    <div class="logo">ล</div>
+    <h1>ตารางไลฟ์</h1>
+    <p>ดูตารางงานแบบเรียลไทม์ และจองกะไลฟ์ของคุณ</p>
+    ${err ? `<div class="toast err" style="margin:0 0 14px;position:static">${esc(err)}</div>` : ""}
+    <button class="line-btn" id="lineLogin" ${LIFF_ID ? "" : "disabled style='opacity:.5'"}>${LINE_ICON} เข้าสู่ระบบด้วย LINE</button>
+    <a class="small-link" href="?demo">ดูตัวอย่างระบบ (โหมดเดโม ไม่บันทึกจริง)</a>
+  </div></div>`;
+  const b = $("#lineLogin");
+  b && (b.onclick = async () => {
+    try { await loadLiff(); await liff.init({ liffId: LIFF_ID }); liff.login({ redirectUri: location.href.split("#")[0] }); }
+    catch (e) { toast(e.message, "err"); }
+  });
+}
+
+function renderClaim() {
+  const free = S.staff.filter(s => s.active && !s.auth_user_id);
+  const nm = S.user.user_metadata?.name || "";
+  $("#app").innerHTML = `<div class="center"><div class="login" style="max-width:460px">
+    <div class="logo">${esc(nm.slice(0, 1) || "?")}</div>
+    <h1>สวัสดี ${esc(nm)}</h1>
+    <p>เลือกชื่อเล่นของคุณในตาราง เพื่อผูกกับบัญชี LINE นี้ (ทำครั้งเดียว)</p>
+    <div class="namegrid">${free.map(s => `<button class="pill p-name" data-id="${s.id}" style="background:${s.bg_color};color:${s.fg_color}">${esc(s.nickname)}</button>`).join("") || `<div class="empty">ไม่มีชื่อว่างให้เลือก กรุณาติดต่อแอดมิน</div>`}</div>
+    <p class="note">ไม่เจอชื่อตัวเอง? ให้แอดมินเพิ่มชื่อในเมนู "แอดมิน → พนักงาน"</p>
+    <a class="small-link" href="#" id="lo">ออกจากระบบ</a>
+  </div></div>`;
+  $("#lo").onclick = e => { e.preventDefault(); signOut(); };
+  document.querySelectorAll(".namegrid .pill").forEach(b => b.onclick = () => {
+    const s = S.staff.find(x => x.id === b.dataset.id);
+    openSheet(`<h3>ยืนยันว่าคุณคือ "${esc(s.nickname)}"?</h3>
+      <p class="lead">บัญชี LINE <b>${esc(nm)}</b> จะผูกกับชื่อนี้ และเปลี่ยนเองไม่ได้ (ต้องให้แอดมินยกเลิกให้)</p>
+      <div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn go" id="doClaim">ใช่ นี่คือฉัน</button></div>`);
+    $("#doClaim").onclick = async () => {
+      try { $("#doClaim").disabled = true; await API.rpc("claim_staff", { p_staff_id: s.id }); closeSheet(); await loadBase(); S.me = S.staff.find(x => x.auth_user_id === S.user.id) || s; if (DEMO) S.me = s; startApp(); }
+      catch (e) { toast(e.message, "err"); $("#doClaim").disabled = false; }
+    };
+  });
+}
+
+async function signOut() {
+  await API.signOut();
+  try { if (window.liff && liff.isLoggedIn && liff.isLoggedIn()) liff.logout(); } catch (e) {}
+  location.reload();
+}
+
+/* ===== App ===== */
+async function startApp() {
+  const t = parseD(todayStr());
+  if (!S.y) { S.y = t.y; S.m = t.m; S.sel = todayStr(); }
+  renderShell();
+  await loadMonth();
+  API.subscribe(onRealtime, on => { S.live = on; const l = $("#live"); if (l) { l.classList.toggle("on", on); l.lastChild.textContent = on ? "อัปเดตสด" : "กำลังเชื่อมต่อ…"; } });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") loadMonth(true); });
+}
+
+async function loadMonth(silent) {
+  try {
+    const rows = await API.loadMonth(S.y, S.m);
+    S.slots = new Map(rows.map(r => [r.id, r]));
+    render();
+  } catch (e) { if (!silent) toast("โหลดข้อมูลไม่สำเร็จ: " + e.message, "err"); }
+}
+
+function onRealtime(table, p) {
+  if (table === "staff") {
+    const r = p.new && p.new.id ? p.new : null;
+    if (r) { const i = S.staff.findIndex(s => s.id === r.id); if (i >= 0) S.staff[i] = r; else S.staff.push(r); if (S.me && r.id === S.me.id) S.me = r; }
+    return render();
+  }
+  if (p.eventType === "DELETE") { S.slots.delete(p.old.id); return render(); }
+  const r = p.new; const prev = S.slots.get(r.id);
+  const inMonth = r.work_date.startsWith(`${S.y}-${pad(S.m)}-`);
+  if (inMonth) { S.slots.set(r.id, r); S.flash.add(r.id); }
+  if (prev && S.me && prev.staff_id === S.me.id && prev.status === "pending") {
+    const label = slotLabel(r);
+    if (r.status === "approved") toast(`✓ อนุมัติแล้ว: ${label}`, "ok");
+    else if (r.status === "open") toast(`คำขอถูกปฏิเสธ/ยกเลิก: ${label}`, "err");
+  }
+  render();
+  setTimeout(() => S.flash.delete(r.id), 1700);
+}
+
+/* lookups */
+const shiftById = id => S.shifts.find(s => s.id === id);
+const chanById = id => S.channels.find(c => c.id === id);
+const staffById = id => S.staff.find(s => s.id === id);
+const isAdmin = () => S.me && S.me.role === "admin";
+function slotLabel(s) { const sh = shiftById(s.shift_id); const ch = chanById(sh.channel_id); return `${ch.name} ${sh.label} · ${thDate(s.work_date)}`; }
+function slotIndex() {
+  const idx = {}; for (const s of S.slots.values()) (idx[s.work_date] ||= {})[s.shift_id] = s; return idx;
+}
+
+function renderShell() {
+  const pic = S.me.line_picture_url || S.user.user_metadata?.picture;
+  $("#app").innerHTML = `
+  ${DEMO ? `<div class="demo-bar"><div class="wrap"><b>โหมดเดโม</b><span>ข้อมูลจริงเดือน ต.ค. แต่ทุกการกดจะไม่ถูกบันทึก</span><label><input type="checkbox" id="demoAdmin"> ดูในมุมแอดมิน</label></div></div>` : ""}
+  <header class="top"><div class="wrap">
+    <div class="brand">ตารางไลฟ์</div>
+    <span class="live" id="live"><i></i><span>กำลังเชื่อมต่อ…</span></span>
+    <div class="spacer"></div>
+    <button class="me" id="meBtn">${pic ? `<img src="${esc(pic)}" alt="">` : `<span class="av" style="background:${S.me.bg_color}"></span>`}
+      <span style="text-align:left"><span class="nm">${esc(S.me.nickname)}</span><span class="rl">${isAdmin() ? "แอดมิน" : "พนักงาน"}</span></span></button>
+  </div></header>
+  <main class="wrap" id="main"></main>`;
+  $("#meBtn").onclick = () => openSheet(`<h3>${esc(S.me.nickname)}</h3><p class="lead">LINE: ${esc(S.me.line_display_name || S.user.user_metadata?.name || "-")} · ${isAdmin() ? "แอดมิน" : "พนักงาน"}</p>
+    <div class="btns"><button class="btn" data-close>ปิด</button><button class="btn warn" id="soBtn">ออกจากระบบ</button></div>`) || ($("#soBtn").onclick = signOut);
+  const da = $("#demoAdmin"); if (da) da.onchange = () => { API.demoSetAdmin(da.checked); S.me = { ...S.me, role: da.checked ? "admin" : "staff" }; renderShell(); render(); const l = $("#live"); l.classList.add("on"); l.lastChild.textContent = "อัปเดตสด"; $("#demoAdmin").checked = da.checked; };
+}
+
+function render() {
+  const main = $("#main"); if (!main) return;
+  const pendingCount = [...S.slots.values()].filter(s => s.status === "pending").length;
+  const tabs = [["overview", "ภาพรวม"], ["mine", "กะของฉัน"], ["summary", "สรุปรายคน"]];
+  if (isAdmin()) tabs.push(["admin", `แอดมิน${pendingCount ? ` <span class="badge">${pendingCount}</span>` : ""}`]);
+  if (S.tab === "admin" && !isAdmin()) S.tab = "overview";
+  main.innerHTML = `
+    <div class="head">
+      <div class="month"><button class="icon-btn" id="pm" aria-label="เดือนก่อน">‹</button><h1>${TH_MONTHS[S.m - 1]} ${S.y + 543}</h1><button class="icon-btn" id="nm" aria-label="เดือนถัดไป">›</button></div>
+      <div class="spacer"></div>
+      <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab ${S.tab === k ? "on" : ""}" data-tab="${k}">${l}</button>`).join("")}</nav>
+    </div>
+    <section id="body"></section>`;
+  $("#pm").onclick = () => shiftMonth(-1); $("#nm").onclick = () => shiftMonth(1);
+  main.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
+  const body = $("#body");
+  if (S.tab === "overview") renderOverview(body);
+  else if (S.tab === "mine") renderMine(body);
+  else if (S.tab === "summary") renderSummary(body);
+  else renderAdmin(body);
+  body.querySelectorAll("[data-slot]").forEach(b => b.onclick = () => openSlot(+b.dataset.slot));
+}
+
+function shiftMonth(d) {
+  let m = S.m + d, y = S.y; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; }
+  S.y = y; S.m = m; const t = todayStr();
+  S.sel = t.startsWith(`${y}-${pad(m)}`) ? t : ymd(y, m, 1);
+  loadMonth();
+}
+
+function pill(s, compact) {
+  if (!s) return `<span class="pill p-closed">—</span>`;
+  const past = s.work_date < todayStr() ? " past" : "";
+  const fl = S.flash.has(s.id) ? " flash" : "";
+  if (s.status === "open") return past ? `<span class="pill p-closed${past}">ว่าง (ผ่านแล้ว)</span>` : `<button class="pill p-open${fl}" data-slot="${s.id}">${compact ? "ว่าง" : "ว่าง · จอง"}</button>`;
+  const tag = (isAdmin() || s.staff_id === S.me.id) ? "button" : "span";
+  const at = tag === "button" ? ` data-slot="${s.id}"` : "";
+  if (s.status === "full") return isAdmin() ? `<button class="pill p-full${past}${fl}" data-slot="${s.id}">เต็มแล้ว</button>` : `<span class="pill p-full${past}">เต็มแล้ว</span>`;
+  if (s.status === "closed") return isAdmin() ? `<button class="pill p-closed${past}${fl}" data-slot="${s.id}">ไม่รับคน</button>` : `<span class="pill p-closed${past}">ไม่รับคน</span>`;
+  const st = staffById(s.staff_id) || { nickname: "?", bg_color: "#999", fg_color: "#fff" };
+  const mine = s.staff_id === S.me.id ? " p-mine" : "";
+  if (s.status === "pending") return `<${tag} class="pill p-pend${mine}${past}${fl}"${at} title="รออนุมัติ">${esc(st.nickname)} <small>รออนุมัติ</small></${tag}>`;
+  return `<${tag} class="pill p-name${mine}${past}${fl}"${at} style="background:${st.bg_color};color:${st.fg_color}">${esc(st.nickname)}</${tag}>`;
+}
+
+function stats() {
+  const t = todayStr(); let open = 0, pend = 0, mine = 0, minePend = 0, openToday = 0;
+  for (const s of S.slots.values()) {
+    if (s.status === "open" && s.work_date >= t) { open++; if (s.work_date === t) openToday++; }
+    if (s.status === "pending") pend++;
+    if (s.staff_id === S.me.id) { if (s.status === "approved") mine++; else if (s.status === "pending") minePend++; }
+  }
+  return { open, pend, mine, minePend, openToday };
+}
+
+function renderOverview(body) {
+  const st = stats();
+  const nextMine = [...S.slots.values()].filter(s => s.staff_id === S.me.id && s.work_date >= todayStr()).sort((a, b) => a.work_date.localeCompare(b.work_date))[0];
+  const chans = [...S.channels].sort((a, b) => a.sort_order - b.sort_order);
+  body.innerHTML = `
+    <div class="stats">
+      <div class="stat open"><div class="k">ช่องว่างที่ยังจองได้</div><div class="v tnum">${st.open}</div><div class="s">วันนี้ ${st.openToday} ช่อง</div></div>
+      <div class="stat pend"><div class="k">รออนุมัติ (ทั้งทีม)</div><div class="v tnum">${st.pend}</div><div class="s">คำขอที่ยังไม่ยืนยัน</div></div>
+      <div class="stat"><div class="k">กะของฉันเดือนนี้</div><div class="v tnum">${st.mine}</div><div class="s">${st.minePend ? `+ รออนุมัติ ${st.minePend}` : "อนุมัติแล้วทั้งหมด"}</div></div>
+      <div class="stat"><div class="k">กะถัดไปของฉัน</div><div class="v" style="font-size:16px;padding-top:6px">${nextMine ? esc(chanById(shiftById(nextMine.shift_id).channel_id).name) + " " + shiftById(nextMine.shift_id).label : "—"}</div><div class="s">${nextMine ? thDate(nextMine.work_date) : "ยังไม่มีกะ"}</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="seg"><button data-v="day" class="${S.view === "day" ? "on" : ""}">รายวัน</button><button data-v="grid" class="${S.view === "grid" ? "on" : ""}">ทั้งเดือน</button></div>
+      <label class="chk"><input type="checkbox" id="oo" ${S.onlyOpen ? "checked" : ""}> แสดงเฉพาะวันที่มีช่องว่าง</label>
+    </div>
+    <div class="legend"><span><b style="background:var(--open-bg);border:1px solid var(--open-line)"></b>ว่าง กดเพื่อจอง</span><span><b style="background:var(--pending-bg);border:1px dashed var(--pending-line)"></b>รออนุมัติ</span><span><b style="background:var(--full-bg)"></b>เต็มแล้ว</span><span><b style="border:1px dashed var(--line-2)"></b>ไม่รับคน</span><span><b style="outline:2px solid var(--ink);outline-offset:-2px"></b>กะของฉัน</span></div>
+    <div id="viewBody"></div>`;
+  body.querySelectorAll("[data-v]").forEach(b => b.onclick = () => { S.view = b.dataset.v; try { localStorage.setItem("ls_view", S.view); } catch (e) {} render(); });
+  $("#oo").onchange = e => { S.onlyOpen = e.target.checked; render(); };
+  const vb = $("#viewBody");
+  if (!S.slots.size) {
+    vb.innerHTML = `<div class="panel"><div class="empty">ยังไม่มีตารางของเดือนนี้${isAdmin() ? `<br><br><button class="btn pri" id="gen">สร้างตารางเดือนนี้ (ทุกช่องเป็น "ว่าง")</button>` : ""}</div></div>`;
+    const g = $("#gen"); if (g) g.onclick = genMonth; return;
+  }
+  const idx = slotIndex(); const n = daysIn(S.y, S.m); const t = todayStr();
+  const dates = []; for (let d = 1; d <= n; d++) { const ds = ymd(S.y, S.m, d); if (idx[ds]) dates.push(ds); }
+  const openCount = ds => Object.values(idx[ds] || {}).filter(s => s.status === "open").length;
+  const shown = S.onlyOpen ? dates.filter(ds => ds >= t && openCount(ds) > 0) : dates;
+  if (S.view === "grid") {
+    const colsBy = chans.map(c => ({ c, sh: S.shifts.filter(s => s.channel_id === c.id).sort((a, b) => a.sort_order - b.sort_order) }));
+    vb.innerHTML = `<div class="gridwrap"><table class="g"><thead>
+      <tr class="r1"><th class="first" rowspan="2">วันที่</th>${colsBy.map(({ c, sh }) => `<th class="ch" colspan="${sh.length}" style="background:${c.color}">${esc(c.name)}${c.subtitle ? ` <span style="font-weight:500;opacity:.75">(${esc(c.subtitle)})</span>` : ""}</th>`).join("")}</tr>
+      <tr class="r2">${colsBy.map(({ sh }) => sh.map((s, i) => `<th class="${i === 0 ? "cl" : ""}">${s.label}</th>`).join("")).join("")}</tr></thead>
+      <tbody>${shown.map(ds => { const p = parseD(ds); return `<tr class="${ds < t ? "past" : ""} ${ds === t ? "today" : ""}">
+        <td class="first"><span class="dlab"><span class="wdp" style="background:${WD_COLOR[p.wd]}22;color:${WD_COLOR[p.wd]}">${WD[p.wd]}</span><span class="tnum">${p.d}</span>${ds === t ? `<small style="color:var(--accent)">วันนี้</small>` : ""}</span></td>
+        ${colsBy.map(({ sh }) => sh.map((s, i) => `<td class="${i === 0 ? "cl" : ""}">${pill(idx[ds][s.id], true)}</td>`).join("")).join("")}</tr>`; }).join("") || `<tr><td class="first" colspan="99"><div class="empty">ไม่มีวันที่มีช่องว่าง</div></td></tr>`}</tbody></table></div>`;
+    const tr = vb.querySelector("tr.today"); if (tr && !S._scrolled) { S._scrolled = true; const gw = vb.querySelector(".gridwrap"); setTimeout(() => { gw.scrollTop = Math.max(0, tr.offsetTop - 120); }, 0); }
+  } else {
+    if (!shown.includes(S.sel)) S.sel = shown.find(d => d >= t) || shown[0];
+    vb.innerHTML = `<div class="strip" id="strip">${shown.map(ds => { const p = parseD(ds); const oc = openCount(ds); return `<button class="dchip ${ds < t ? "past" : ""} ${ds === t ? "today" : ""} ${ds === S.sel ? "on" : ""}" data-d="${ds}">
+        <div class="wd"><i style="background:${WD_COLOR[p.wd]}"></i>${WD_S[p.wd]}</div><div class="dn tnum">${p.d}</div><div class="oc">${oc && ds >= t ? `ว่าง ${oc}` : ""}</div></button>`; }).join("")}</div>
+      ${S.sel ? `<div class="day-title"><h2>${thDate(S.sel)}</h2><span class="sub">${S.sel === t ? "วันนี้" : ""}</span></div>
+      <div class="cards">${chans.map(c => { const sh = S.shifts.filter(s => s.channel_id === c.id).sort((a, b) => a.sort_order - b.sort_order); return `<div class="card">
+        <div class="card-h"><span class="sw" style="background:${c.color}"></span><div><div class="t">${esc(c.name)}</div>${c.subtitle ? `<div class="st">${esc(c.subtitle)}</div>` : ""}</div></div>
+        ${sh.map(s => `<div class="srow"><span class="tm tnum">${s.label}</span><span class="sl">${pill(idx[S.sel]?.[s.id])}</span></div>`).join("")}</div>`; }).join("")}</div>` : `<div class="panel"><div class="empty">ไม่มีวันที่มีช่องว่าง</div></div>`}`;
+    vb.querySelectorAll("[data-d]").forEach(b => b.onclick = () => { S.sel = b.dataset.d; render(); });
+    const on = vb.querySelector(".dchip.on"); if (on) on.scrollIntoView({ inline: "center", block: "nearest", behavior: "instant" });
+  }
+}
+
+function renderMine(body) {
+  const t = todayStr();
+  const mine = [...S.slots.values()].filter(s => s.staff_id === S.me.id && ["pending", "approved"].includes(s.status))
+    .sort((a, b) => a.work_date.localeCompare(b.work_date) || shiftById(a.shift_id).label.localeCompare(shiftById(b.shift_id).label));
+  const up = mine.filter(s => s.work_date >= t), past = mine.filter(s => s.work_date < t);
+  const row = s => { const p = parseD(s.work_date); const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id);
+    return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[p.wd]}">${WD[p.wd]}</div><div class="d tnum">${p.d}</div></div>
+      <div class="what"><div class="a">${esc(c.name)} · <span class="tnum">${sh.label}</span></div><div class="b">${thDate(s.work_date)}</div></div>
+      ${s.status === "pending" ? `<span class="pill p-pend" style="min-width:0">รออนุมัติ</span>${s.work_date >= t ? `<button class="btn sm warn" data-cancel="${s.id}">ยกเลิก</button>` : ""}` : `<span class="pill p-name" style="min-width:0;background:var(--open-bg);color:var(--open)">อนุมัติแล้ว</span>`}</div>`; };
+  body.innerHTML = `<div class="panel"><div class="panel-h"><h3>กะที่จะถึง</h3><span class="sub">${up.length} กะ</span></div>${up.map(row).join("") || `<div class="empty">ยังไม่มีกะที่จะถึงในเดือนนี้ — ไปที่ "ภาพรวม" แล้วกดช่องสีเขียวเพื่อจอง</div>`}</div>
+    ${past.length ? `<div class="panel"><div class="panel-h"><h3>ผ่านไปแล้ว</h3><span class="sub">${past.length} กะ</span></div>${past.map(row).join("")}</div>` : ""}`;
+  body.querySelectorAll("[data-cancel]").forEach(b => b.onclick = () => confirmCancel(+b.dataset.cancel));
+}
+
+function renderSummary(body) {
+  const n = daysIn(S.y, S.m);
+  const ranges = { a: [1, 15], b: [16, n], all: [1, n] };
+  const [d1, d2] = ranges[S.sumRange]; const from = ymd(S.y, S.m, d1), to = ymd(S.y, S.m, d2);
+  const cnt = {}; for (const s of S.slots.values()) if (s.staff_id && s.work_date >= from && s.work_date <= to) { const c = (cnt[s.staff_id] ||= { a: 0, p: 0 }); s.status === "approved" ? c.a++ : c.p++; }
+  const rows = S.staff.filter(s => s.active).map(s => ({ s, ...(cnt[s.id] || { a: 0, p: 0 }) })).sort((x, y) => (y.a + y.p) - (x.a + x.p) || x.s.nickname.localeCompare(y.s.nickname, "th"));
+  const max = Math.max(1, ...rows.map(r => r.a + r.p));
+  body.innerHTML = `<div class="panel"><div class="panel-h"><h3>จำนวนกะต่อคน</h3><span class="sub">${d1}–${d2} ${TH_MON_S[S.m - 1]}</span><div class="spacer"></div>
+    <div class="seg"><button data-r="a" class="${S.sumRange === "a" ? "on" : ""}">1–15</button><button data-r="b" class="${S.sumRange === "b" ? "on" : ""}">16–${n}</button><button data-r="all" class="${S.sumRange === "all" ? "on" : ""}">ทั้งเดือน</button></div></div>
+    <div class="bars">${rows.map(r => `<div class="bar"><span class="n">${esc(r.s.nickname)}</span><span class="track"><span class="fill" style="width:${r.a / max * 100}%;background:${r.s.bg_color}"></span><span class="fill p" style="width:${r.p / max * 100}%"></span></span><span class="c tnum">${r.a}${r.p ? ` <small>+${r.p}</small>` : ""}</span></div>`).join("")}</div>
+    <div class="note" style="padding:0 16px 14px">นับเฉพาะกะที่มีชื่อ · ส่วนลายทาง = รออนุมัติ</div></div>`;
+  body.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { S.sumRange = b.dataset.r; render(); });
+}
+
+function renderAdmin(body) {
+  const pend = [...S.slots.values()].filter(s => s.status === "pending").sort((a, b) => (a.requested_at || "").localeCompare(b.requested_at || ""));
+  body.innerHTML = `
+  <div class="panel"><div class="panel-h"><h3>คำขอรออนุมัติ</h3><span class="sub">${pend.length} รายการ</span>
+    ${pend.length > 1 ? `<div class="spacer"></div><button class="btn sm go" id="apAll">อนุมัติทั้งหมด</button>` : ""}</div>
+    ${pend.map(s => { const p = parseD(s.work_date); const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id); const st = staffById(s.staff_id);
+      return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[p.wd]}">${WD[p.wd]}</div><div class="d tnum">${p.d}</div></div>
+      <div class="what"><div class="a"><span class="pill p-name" style="min-width:0;height:24px;font-size:12.5px;background:${st?.bg_color};color:${st?.fg_color}">${esc(st?.nickname)}</span> ${esc(c.name)} · <span class="tnum">${sh.label}</span></div>
+      <div class="b">ขอเมื่อ ${s.requested_at ? new Date(s.requested_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "short", timeStyle: "short" }) : "-"}</div></div>
+      <div class="row-actions"><button class="btn sm warn" data-rj="${s.id}">ปฏิเสธ</button><button class="btn sm go" data-ap="${s.id}">อนุมัติ</button></div></div>`; }).join("") || `<div class="empty">ไม่มีคำขอค้าง</div>`}
+  </div>
+  <div class="panel"><div class="panel-h"><h3>พนักงาน</h3><span class="sub">${S.staff.filter(s => s.auth_user_id).length}/${S.staff.length} คนผูก LINE แล้ว</span><div class="spacer"></div><button class="btn sm" id="addStaff">+ เพิ่มพนักงาน</button></div>
+    <div class="sgrid">${S.staff.map(s => `<div class="scard" style="${s.active ? "" : "opacity:.5"}">
+      <span class="pill p-name" style="min-width:0;background:${s.bg_color};color:${s.fg_color}">${esc(s.nickname)}</span>
+      <div class="info">${s.auth_user_id ? `✓ ${esc(s.line_display_name || "ผูก LINE แล้ว")}` : "ยังไม่ผูก LINE"}${s.role === "admin" ? " · <b>แอดมิน</b>" : ""}</div>
+      <button class="btn sm" data-es="${s.id}">แก้ไข</button></div>`).join("")}</div></div>
+  <div class="panel"><div class="panel-h"><h3>ตารางเดือน</h3></div><div style="padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button class="btn" id="gen">เติมช่องที่ยังไม่มีของ ${TH_MONTHS[S.m - 1]} ${S.y + 543}</button><span class="note" style="margin:0">สร้างช่องสถานะ "ว่าง" ให้ทุกวัน/ทุกกะที่ยังไม่มี (ช่องเดิมไม่ถูกแก้)</span></div></div>`;
+  body.querySelectorAll("[data-ap]").forEach(b => b.onclick = () => review(+b.dataset.ap, true));
+  body.querySelectorAll("[data-rj]").forEach(b => b.onclick = () => review(+b.dataset.rj, false));
+  body.querySelectorAll("[data-es]").forEach(b => b.onclick = () => editStaff(b.dataset.es));
+  $("#addStaff").onclick = () => editStaff(null);
+  $("#gen").onclick = genMonth;
+  const aa = $("#apAll"); if (aa) aa.onclick = () => {
+    openSheet(`<h3>อนุมัติทั้งหมด ${pend.length} รายการ?</h3><p class="lead">ทุกคำขอที่รออยู่จะถูกยืนยันลงตาราง</p><div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn go" id="ok">อนุมัติทั้งหมด</button></div>`);
+    $("#ok").onclick = async () => { $("#ok").disabled = true; let ok = 0; for (const s of pend) { try { await API.rpc("admin_review", { p_slot_id: s.id, p_approve: true }); ok++; } catch (e) {} } closeSheet(); toast(`อนุมัติแล้ว ${ok} รายการ`, "ok"); loadMonth(true); };
+  };
+}
+
+async function review(id, approve) {
+  try { await API.rpc("admin_review", { p_slot_id: id, p_approve: approve }); toast(approve ? "อนุมัติแล้ว" : "ปฏิเสธแล้ว — ช่องกลับเป็นว่าง", approve ? "ok" : ""); closeSheet(); }
+  catch (e) { toast(e.message, "err"); }
+}
+
+async function genMonth() {
+  try { const n = await API.rpc("admin_generate_month", { p_year: S.y, p_month: S.m }); toast(`เพิ่ม ${n} ช่อง`, "ok"); loadMonth(); }
+  catch (e) { toast(e.message, "err"); }
+}
+
+function editStaff(id) {
+  const s = id ? staffById(id) : { nickname: "", bg_color: "#94a3b8", fg_color: "#ffffff", role: "staff", active: true };
+  openSheet(`<h3>${id ? "แก้ไขพนักงาน" : "เพิ่มพนักงาน"}</h3><p class="lead"> </p>
+    <label class="field">ชื่อเล่น (ตามที่แสดงในตาราง)<input type="text" id="fn" value="${esc(s.nickname)}"></label>
+    <div style="display:flex;gap:12px"><label class="field" style="flex:1">สีพื้น<input type="color" id="fb" value="${s.bg_color}"></label><label class="field" style="flex:1">สีตัวอักษร<input type="color" id="ff" value="${s.fg_color}"></label>
+    <label class="field" style="flex:1">ตัวอย่าง<span class="pill p-name" id="fp" style="min-width:0;background:${s.bg_color};color:${s.fg_color}">${esc(s.nickname || "ชื่อ")}</span></label></div>
+    <label class="field">สิทธิ์<select id="fr"><option value="staff" ${s.role === "staff" ? "selected" : ""}>พนักงาน</option><option value="admin" ${s.role === "admin" ? "selected" : ""}>แอดมิน (อนุมัติ/แก้ตารางได้)</option></select></label>
+    <label class="chk" style="margin-bottom:14px"><input type="checkbox" id="fa" ${s.active ? "checked" : ""}> ยังทำงานอยู่</label>
+    ${id && s.auth_user_id ? `<div class="note" style="margin:0 0 14px">ผูกกับ LINE: ${esc(s.line_display_name || "-")} <button class="btn sm warn" id="unl" style="margin-left:6px">ยกเลิกการผูก</button></div>` : ""}
+    <div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn pri" id="sv">บันทึก</button></div>`);
+  const upd = () => { const p = $("#fp"); p.style.background = $("#fb").value; p.style.color = $("#ff").value; p.textContent = $("#fn").value || "ชื่อ"; };
+  ["fn", "fb", "ff"].forEach(i => $("#" + i).oninput = upd);
+  $("#sv").onclick = async () => {
+    const nm = $("#fn").value.trim(); if (!nm) return toast("ใส่ชื่อก่อน", "err");
+    try { await API.rpc("admin_upsert_staff", { p_id: id, p_nickname: nm, p_bg: $("#fb").value, p_fg: $("#ff").value, p_role: $("#fr").value, p_active: $("#fa").checked }); closeSheet(); await loadBase(); if (S.me) S.me = staffById(S.me.id) || S.me; render(); toast("บันทึกแล้ว", "ok"); }
+    catch (e) { toast(e.message, "err"); }
+  };
+  const u = $("#unl"); if (u) u.onclick = async () => { try { await API.rpc("admin_unlink_staff", { p_id: id }); closeSheet(); await loadBase(); render(); toast("ยกเลิกการผูกแล้ว"); } catch (e) { toast(e.message, "err"); } };
+}
+
+/* ===== Slot dialogs ===== */
+function ticket(s) {
+  const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id); const p = parseD(s.work_date);
+  return `<div class="ticket"><div class="tt" style="background:${c.color}"><span>${esc(c.name)}</span><span style="font-weight:500">${esc(c.subtitle || "")}</span></div>
+    <dl><dt>วัน</dt><dd><span style="color:${WD_COLOR[p.wd]}">●</span> ${thDate(s.work_date)}</dd><dt>เวลา</dt><dd class="tnum">${sh.label} น.</dd><dt>สถานะ</dt><dd>${STATUS_TXT[s.status]}${s.staff_id ? " · " + esc(staffById(s.staff_id)?.nickname) : ""}</dd></dl></div>`;
+}
+
+function openSlot(id) {
+  const s = S.slots.get(id); if (!s) return;
+  const past = s.work_date < todayStr();
+  if (s.status === "open" && !past && !isAdmin()) return bookFlow(s);
+  if (s.status === "pending" && s.staff_id === S.me.id && !isAdmin()) return confirmCancel(id);
+  if (isAdmin()) return adminSlot(s);
+  openSheet(`<h3>รายละเอียดกะ</h3><p class="lead"></p>${ticket(s)}<div class="btns"><button class="btn" data-close>ปิด</button></div>`);
+}
+
+function bookFlow(s) {
+  // Step 1: review + tick confirmation
+  openSheet(`<div class="steps"><span class="on">1 ตรวจสอบ</span><span>2 ยืนยัน</span><span>3 แอดมินอนุมัติ</span></div>
+    <h3>จองกะนี้?</h3><p class="lead">ตรวจสอบวันและเวลาให้แน่ใจก่อนส่งคำขอ</p>${ticket(s)}
+    <label class="confirm-box"><input type="checkbox" id="sure"><span>ฉันตรวจสอบวัน-เวลาแล้ว และ<b>มั่นใจว่าจะเข้ากะนี้ได้</b></span></label>
+    <div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn go" id="next" disabled>ถัดไป</button></div>`);
+  $("#sure").onchange = e => $("#next").disabled = !e.target.checked;
+  $("#next").onclick = () => {
+    // Step 2: final confirm
+    const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id);
+    openSheet(`<div class="steps"><span class="on">1 ตรวจสอบ</span><span class="on">2 ยืนยัน</span><span>3 แอดมินอนุมัติ</span></div>
+      <h3>ยืนยันครั้งสุดท้าย</h3>
+      <p class="lead">คุณกำลังจอง <b>${esc(c.name)} ${sh.label}</b><br>${thDate(s.work_date)}</p>
+      <p class="note" style="margin:0 0 16px">เมื่อส่งแล้ว ช่องนี้จะถูกล็อกเป็น "รออนุมัติ" ทันที คนอื่นจะจองซ้ำไม่ได้ ยกเลิกเองได้จนกว่าแอดมินจะอนุมัติ</p>
+      <div class="btns"><button class="btn" id="back">ย้อนกลับ</button><button class="btn go" id="go">ยืนยันจอง</button></div>`);
+    $("#back").onclick = () => bookFlow(s);
+    $("#go").onclick = async () => {
+      $("#go").disabled = true; $("#go").textContent = "กำลังส่ง…";
+      try { const r = await API.rpc("request_booking", { p_slot_id: s.id }); if (r && r.id) { S.slots.set(r.id, r); } closeSheet(); render(); toast("ส่งคำขอแล้ว รอแอดมินอนุมัติ", "ok"); }
+      catch (e) { closeSheet(); toast(e.message, "err"); loadMonth(true); }
+    };
+  };
+}
+
+function confirmCancel(id) {
+  const s = S.slots.get(id);
+  openSheet(`<h3>ยกเลิกคำขอนี้?</h3><p class="lead">ช่องจะกลับเป็น "ว่าง" ให้คนอื่นจองได้</p>${ticket(s)}
+    <div class="btns"><button class="btn" data-close>ไม่ยกเลิก</button><button class="btn warn" id="cx">ยกเลิกคำขอ</button></div>`);
+  $("#cx").onclick = async () => { try { const r = await API.rpc("cancel_booking", { p_slot_id: id }); if (r && r.id) S.slots.set(r.id, r); closeSheet(); render(); toast("ยกเลิกแล้ว"); } catch (e) { toast(e.message, "err"); } };
+}
+
+function adminSlot(s) {
+  const opts = S.staff.filter(x => x.active).map(x => `<option value="${x.id}" ${x.id === s.staff_id ? "selected" : ""}>${esc(x.nickname)}</option>`).join("");
+  const cur = ["approved", "pending"].includes(s.status) ? "assign" : s.status;
+  openSheet(`<h3>จัดการช่อง</h3><p class="lead">สิทธิ์แอดมิน</p>${ticket(s)}
+    ${s.status === "pending" ? `<div class="btns" style="margin-bottom:6px"><button class="btn warn" id="rj">ปฏิเสธ</button><button class="btn go" id="ap">อนุมัติคำขอ</button></div><hr class="sep">` : ""}
+    <label class="field">ตั้งสถานะ<select id="as">
+      <option value="open" ${cur === "open" ? "selected" : ""}>ว่าง (เปิดให้จอง)</option>
+      <option value="full" ${cur === "full" ? "selected" : ""}>เต็มแล้ว</option>
+      <option value="closed" ${cur === "closed" ? "selected" : ""}>ไม่รับคน</option>
+      <option value="assign" ${cur === "assign" ? "selected" : ""}>ลงชื่อพนักงาน (อนุมัติทันที)</option></select></label>
+    <label class="field ${cur === "assign" ? "" : "hidden"}" id="asw">พนักงาน<select id="ast"><option value="">— เลือก —</option>${opts}</select></label>
+    <div class="btns"><button class="btn" data-close>ปิด</button><button class="btn pri" id="asv">บันทึก</button></div>`);
+  $("#as").onchange = e => $("#asw").classList.toggle("hidden", e.target.value !== "assign");
+  const ap = $("#ap"); if (ap) { ap.onclick = () => review(s.id, true); $("#rj").onclick = () => review(s.id, false); }
+  $("#asv").onclick = async () => {
+    const v = $("#as").value; const st = $("#ast").value;
+    if (v === "assign" && !st) return toast("เลือกพนักงานก่อน", "err");
+    try { const r = await API.rpc("admin_set_slot", { p_slot_id: s.id, p_status: v === "assign" ? "approved" : v, p_staff_id: v === "assign" ? st : null }); if (r && r.id) S.slots.set(r.id, r); closeSheet(); render(); toast("บันทึกแล้ว", "ok"); }
+    catch (e) { toast(e.message, "err"); }
+  };
+}
+
+/* ===== Sheet (modal) ===== */
+function openSheet(html) {
+  closeSheet();
+  const d = document.createElement("div"); d.className = "scrim"; d.id = "scrim";
+  d.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  d.addEventListener("click", e => { if (e.target === d || e.target.closest("[data-close]")) closeSheet(); });
+  document.body.appendChild(d);
+}
+function closeSheet() { const d = $("#scrim"); if (d) d.remove(); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+boot();
+</script>
+</body>
+</html>
