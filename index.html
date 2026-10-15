@@ -128,6 +128,7 @@ button.pill:active{transform:scale(.97)}
 .p-open{background:var(--open-bg);color:var(--open);border-color:var(--open-line)}
 button.p-open:hover{background:var(--open);color:#fff}
 .p-full{background:var(--full-bg);color:var(--full)}
+.p-overlap{background:var(--full-bg);color:var(--full);border:1px dashed var(--line-2);font-weight:500}
 .p-wait{background:transparent;color:var(--open);border:1px dashed var(--open-line);font-weight:500;opacity:.8}
 .p-closed{color:var(--closed);border:1px dashed var(--line-2);font-weight:500}
 .p-pend{background:var(--pending-bg);color:var(--pending);border:1px dashed var(--pending-line)}
@@ -209,6 +210,7 @@ table.g .pill{min-width:84px;height:26px;font-size:12.5px;padding:0 9px}
 .cal-d.today{box-shadow:inset 0 0 0 2px var(--ink)}
 .cal-n{font-size:12px;font-weight:700}
 .cal-chip{font-size:10.5px;line-height:1.25;color:#1d1b18;border-radius:5px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-chip.lv{background:transparent!important;border:1px dashed var(--line-2);color:var(--ink-3)}
 .cal-chip.pend{background:repeating-linear-gradient(45deg,#fff4e0 0 4px,#ffe2b0 4px 8px)!important;border:1px dashed #d08a2a}
 @media (max-width:640px){
   .cal-d{min-height:46px;padding:3px}
@@ -216,6 +218,24 @@ table.g .pill{min-width:84px;height:26px;font-size:12.5px;padding:0 9px}
 }
 .plist{border-top:1px solid var(--line)}
 @media (min-width:641px){.plist{display:none}}
+
+@media (max-width:640px){.li{flex-wrap:wrap}.li .row-actions{width:100%;padding-left:74px;justify-content:flex-start}.li .row-actions .btn{flex:1}}
+/* leave */
+.lv-line{margin-top:4px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lv-link{color:var(--ink-3);text-decoration:underline;text-underline-offset:2px}
+.lv-st{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.lv-pending{background:var(--pending-bg);color:var(--pending);border-color:var(--pending-line)}
+.lv-approved{background:var(--full-bg);color:var(--ink-2)}
+.lv-rejected{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.lv-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.lv-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.lv-opt:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.lv-opt input{margin:3px 0 0;width:18px;height:18px;accent-color:var(--ink)}
+.lv-opt b{display:block;font-size:15px}
+.lv-opt small{color:var(--ink-3);font-size:12.5px}
+.lv-opt.dis{opacity:.45;cursor:not-allowed}
+.lv-impact{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:8px}
+.pill .lvtag{font-size:10px;font-weight:700;background:var(--pending);color:#fff;border-radius:99px;padding:1px 5px;margin-left:2px}
 
 /* staff admin */
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;padding:14px 16px}
@@ -306,7 +326,7 @@ function toast(msg, type = "") {
 
 /* ===== State ===== */
 const S = {
-  me: null, user: null, channels: [], shifts: [], staff: [], slots: new Map(),
+  me: null, user: null, channels: [], shifts: [], staff: [], slots: new Map(), leaves: new Map(),
   y: 0, m: 0, sel: null, tab: "overview", view: matchMedia("(min-width:900px)").matches ? "grid" : "day",
   onlyOpen: false, sumRange: "all", live: false, flash: new Set()
 };
@@ -342,6 +362,10 @@ function makeLiveApi() {
       }
       return out;
     },
+    async loadLeaves(from, to) {
+      const { data, error } = await sb.from("leaves").select("*").gte("work_date", from).lte("work_date", to).order("requested_at");
+      if (error) throw error; return data;
+    },
     async rpc(name, args) {
       const { data, error } = await sb.rpc(name, args);
       if (error) throw new Error(error.message); return data;
@@ -349,6 +373,7 @@ function makeLiveApi() {
     subscribe(onEvt, onStatus) {
       sb.channel("live").on("postgres_changes", { event: "*", schema: "public", table: "slots" }, p => onEvt("slots", p))
         .on("postgres_changes", { event: "*", schema: "public", table: "staff" }, p => onEvt("staff", p))
+        .on("postgres_changes", { event: "*", schema: "public", table: "leaves" }, p => onEvt("leaves", p))
         .subscribe(st => onStatus(st === "SUBSCRIBED"));
     },
     async signOut() { await sb.auth.signOut(); }
@@ -365,12 +390,23 @@ function makeDemoApi() {
     const sl = D.slots.find(x => x.shift_id === sh.id && x.work_date === date); sl.status = "pending"; sl.staff_id = D.staff.find(s => s.nickname === nick).id; sl.requested_at = new Date().toISOString();
   };
   mk("warawut", "2026-10-26", "17.00-05.00", "จั๊กจั่น"); mk("support", "2026-10-20", "23.00-08.00", "พีม");
+  { const risa = D.staff.find(s => s.nickname === "RISA").id; const sl = D.slots.find(x => x.staff_id === risa && x.status === "approved" && x.work_date >= "2026-10-21");
+    if (sl) setTimeout(() => mkLeave(sl, risa, "sick", "ไข้ขึ้น ปวดหัวมาก"), 0); }
   let listener = null; const emit = (row, old) => listener && setTimeout(() => listener("slots", { eventType: "UPDATE", new: { ...row }, old }), 120);
+  const emitL = (row, type = "UPDATE") => listener && setTimeout(() => listener("leaves", { eventType: type, new: { ...row } }), 120);
+  D.leaves = []; let leaveId = 1;
+  const mkLeave = (slot, staffId, type, reason, status = "pending", byAdmin = false) => {
+    const sh = D.shifts.find(x => x.id === slot.shift_id); const c = D.channels.find(x => x.id === sh.channel_id);
+    const r = { id: leaveId++, slot_id: slot.id, staff_id: staffId, leave_type: type, reason, status, work_date: slot.work_date, shift_label: sh.label,
+      channel_name: c.name, hours: shiftHours(sh.label).h, shift_start: new Date(Date.parse(`${slot.work_date}T00:00:00+07:00`) + (+sh.label.slice(0,2) * 60 + +sh.label.slice(3,5)) * 60000).toISOString(), recorded_by_admin: byAdmin, requested_at: new Date().toISOString() };
+    D.leaves.push(r); return r;
+  };
   const meRow = () => D.staff.find(s => s.id === meId);
   const find = id => D.slots.find(s => s.id === id);
   const fns = {
     claim_staff() { return meRow(); },
     request_booking({ p_slot_id }) { const s = find(p_slot_id); if (s.status !== "open") throw new Error("ช่องนี้ไม่ว่างแล้ว มีคนจองก่อนหน้า");
+      const ov = overlapTaker(S.slots.get(p_slot_id)); if (ov) throw new Error(`กะ ${shiftById(s.shift_id).label} ทับกับกะ ${ov.sh.label} ที่ ${ov.st?.nickname || "มีคน"} ลงไว้แล้ว`);
       const bl = blockerFor(S.slots.get(p_slot_id)); if (bl) throw new Error(`กรุณาลงช่อง ${bl.ch.name} กะ ${shiftById(bl.slot.shift_id).label} ก่อน (ยังว่างอยู่)`); Object.assign(s, { status: "pending", staff_id: meId, requested_at: new Date().toISOString() }); emit(s); return s; },
     cancel_booking({ p_slot_id }) { const s = find(p_slot_id); if (s.staff_id !== meId || s.status !== "pending") throw new Error("ยกเลิกได้เฉพาะรายการของตัวเองที่ยังรออนุมัติ"); Object.assign(s, { status: "open", staff_id: null }); emit(s); return s; },
     admin_review({ p_slot_id, p_approve }) { if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); const s = find(p_slot_id); if (p_approve) Object.assign(s, { status: "approved", approved_by: meId }); else Object.assign(s, { status: "open", staff_id: null }); emit(s); return s; },
@@ -382,7 +418,25 @@ function makeDemoApi() {
       } return n;
     },
     admin_upsert_staff(a) { let r = a.p_id ? D.staff.find(s => s.id === a.p_id) : null; if (!r) { r = { id: "n" + Date.now(), auth_user_id: null, active: true }; D.staff.push(r); } Object.assign(r, { nickname: a.p_nickname ?? r.nickname, bg_color: a.p_bg ?? r.bg_color, fg_color: a.p_fg ?? r.fg_color, role: a.p_role ?? r.role, active: a.p_active ?? r.active }); return r; },
-    admin_unlink_staff({ p_id }) { const r = D.staff.find(s => s.id === p_id); r.auth_user_id = null; return r; }
+    admin_unlink_staff({ p_id }) { const r = D.staff.find(s => s.id === p_id); r.auth_user_id = null; return r; },
+    request_leave({ p_slot_id, p_type, p_reason }) {
+      const s = find(p_slot_id); if (!s || s.staff_id !== meId || s.status !== "approved") throw new Error("แจ้งลาได้เฉพาะกะของตัวเองที่อนุมัติแล้ว");
+      if (!p_reason || p_reason.trim().length < 2) throw new Error("กรุณาใส่เหตุผลการลา");
+      const left = shiftStartMs(s) - Date.now(); if (left <= 0) throw new Error("กะนี้เริ่มไปแล้ว กรุณาติดต่อแอดมินโดยตรง");
+      if (p_type === "advance" && left < 48 * 3600e3) throw new Error("ลาล่วงหน้า 2 วัน ต้องแจ้งก่อนเริ่มกะอย่างน้อย 48 ชั่วโมง");
+      if (D.leaves.some(l => l.slot_id === s.id && l.status === "pending")) throw new Error("แจ้งลากะนี้ไปแล้ว รอแอดมินอนุมัติ");
+      const r = mkLeave(s, meId, p_type, p_reason.trim()); emitL(r, "INSERT"); return r;
+    },
+    cancel_leave({ p_leave_id }) { const r = D.leaves.find(l => l.id === p_leave_id); if (!r || r.staff_id !== meId || r.status !== "pending") throw new Error("ยกเลิกได้เฉพาะคำขอลาของตัวเองที่ยังรออนุมัติ"); r.status = "cancelled"; emitL(r); return r; },
+    admin_review_leave({ p_leave_id, p_approve }) {
+      if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); const r = D.leaves.find(l => l.id === p_leave_id); if (r.status !== "pending") throw new Error("คำขอลานี้ไม่ได้อยู่ในสถานะรออนุมัติแล้ว");
+      r.status = p_approve ? "approved" : "rejected"; if (p_approve) { const s = find(r.slot_id); if (s && s.staff_id === r.staff_id) { Object.assign(s, { status: "open", staff_id: null }); emit(s); } } emitL(r); return r;
+    },
+    admin_record_leave({ p_slot_id, p_type, p_reason }) {
+      if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); const s = find(p_slot_id); if (!s || !s.staff_id) throw new Error("ช่องนี้ไม่มีพนักงานลงชื่อไว้");
+      D.leaves.filter(l => l.slot_id === s.id && l.status === "pending").forEach(l => { l.status = "cancelled"; emitL(l); });
+      const r = mkLeave(s, s.staff_id, p_type, p_reason || null, "approved", true); Object.assign(s, { status: "open", staff_id: null }); emit(s); emitL(r, "INSERT"); return r;
+    }
   };
   return {
     demoSetAdmin(on) { meRow().role = on ? "admin" : "staff"; },
@@ -391,6 +445,7 @@ function makeDemoApi() {
     async loadBase() { return { channels: D.channels, shifts: D.shifts, staff: D.staff }; },
     async loadMonth(y, m) { const p = `${y}-${pad(m)}-`; return D.slots.filter(s => s.work_date.startsWith(p)).map(s => ({ ...s })); },
     async loadRange(from, to) { return D.slots.filter(s => s.staff_id && s.work_date >= from && s.work_date <= to).map(s => ({ ...s })); },
+    async loadLeaves(from, to) { const adm = meRow().role === "admin"; return D.leaves.filter(l => l.work_date >= from && l.work_date <= to && (adm || l.staff_id === meId)).map(l => ({ ...l })); },
     async rpc(name, args) { await new Promise(r => setTimeout(r, 250)); return fns[name](args || {}); },
     subscribe(onEvt, onStatus) { listener = onEvt; setTimeout(() => onStatus(true), 400); },
     async signOut() { location.href = location.pathname; }
@@ -505,8 +560,9 @@ async function startApp() {
 
 async function loadMonth(silent) {
   try {
-    const rows = await API.loadMonth(S.y, S.m);
+    const [rows, lv] = await Promise.all([API.loadMonth(S.y, S.m), API.loadLeaves(ymd(S.y, S.m, 1), ymd(S.y, S.m, daysIn(S.y, S.m))).catch(() => [])]);
     S.slots = new Map(rows.map(r => [r.id, r]));
+    S.leaves = new Map(lv.map(r => [r.id, r]));
     render();
   } catch (e) { if (!silent) toast("โหลดข้อมูลไม่สำเร็จ: " + e.message, "err"); }
 }
@@ -515,6 +571,16 @@ function onRealtime(table, p) {
   if (table === "staff") {
     const r = p.new && p.new.id ? p.new : null;
     if (r) { const i = S.staff.findIndex(s => s.id === r.id); if (i >= 0) S.staff[i] = r; else S.staff.push(r); if (S.me && r.id === S.me.id) S.me = r; }
+    return render();
+  }
+  if (table === "leaves") {
+    if (p.eventType === "DELETE") { S.leaves.delete(p.old.id); return render(); }
+    const l = p.new; const prevL = S.leaves.get(l.id);
+    if (l.work_date.startsWith(`${S.y}-${pad(S.m)}-`)) S.leaves.set(l.id, l);
+    if (S.me && l.staff_id === S.me.id && prevL && prevL.status === "pending" && l.status !== "pending" && !isAdmin()) {
+      if (l.status === "approved") toast(`อนุมัติการลาแล้ว: ${l.channel_name} ${l.shift_label}`, "ok");
+      else if (l.status === "rejected") toast(`คำขอลาไม่ได้รับอนุมัติ — กะ ${l.shift_label} ยังเป็นของคุณ`, "err");
+    }
     return render();
   }
   if (p.eventType === "DELETE") { S.slots.delete(p.old.id); return render(); }
@@ -535,16 +601,45 @@ const shiftById = id => S.shifts.find(s => s.id === id);
 const chanById = id => S.channels.find(c => c.id === id);
 const staffById = id => S.staff.find(s => s.id === id);
 const isAdmin = () => S.me && S.me.role === "admin";
+/* leave helpers */
+const LEAVE_TXT = { sick: "ลาป่วย", sudden: "ลากะทันหัน", advance: "ลาล่วงหน้า 2 วัน" };
+const LEAVE_DESC = { sick: "ไม่สบาย เข้ากะไม่ไหว", sudden: "ติดธุระด่วน แจ้งก่อนเริ่มกะไม่ถึง 2 วัน", advance: "แจ้งก่อนเริ่มกะอย่างน้อย 48 ชั่วโมง" };
+const LEAVE_STATUS = { pending: "รออนุมัติ", approved: "อนุมัติแล้ว", rejected: "ไม่อนุมัติ", cancelled: "ยกเลิกแล้ว" };
+function shiftStartMs(slot) { const sh = shiftById ? shiftById(slot.shift_id) : null; const label = sh ? sh.label : ""; const r = String(label).match(/(\d{1,2})[.:](\d{2})/); return Date.parse(`${slot.work_date}T00:00:00+07:00`) + (r ? (+r[1] * 60 + +r[2]) * 60000 : 0); }
+const pendingLeaveOf = slotId => [...S.leaves.values()].find(l => l.slot_id === slotId && l.status === "pending");
 const workers = () => S.staff.filter(s => s.active && s.role !== "admin");
 /* booking priority: KCM → warawut → NAGA Care → TINN Care (same date + same shift time) */
 const PRIO_FALLBACK = { kcm: 1, warawut: 2, naga: 3, tinn: 4 };
 const prioOf = c => (c && (c.priority ?? PRIO_FALLBACK[c.code])) || null;
+/* overlap rule: same channel + same date, overlapping time already taken (pending/approved) */
+function rangeOf(label) {
+  const m = String(label).match(/(\d{1,2})[.:](\d{2})\s*-\s*(\d{1,2})[.:](\d{2})/); if (!m) return null;
+  const a = +m[1] * 60 + +m[2]; let b = +m[3] * 60 + +m[4]; if (b <= a) b += 1440; return [a, b];
+}
+const rOverlap = (x, y) => x && y && x[0] < y[1] && y[0] < x[1];
+function overlapTaker(s) {
+  if (!s) return null; const sh = shiftById(s.shift_id); const r = rangeOf(sh.label);
+  for (const x of S.slots.values()) {
+    if (x.id === s.id || x.work_date !== s.work_date || !["pending", "approved"].includes(x.status)) continue;
+    const xsh = shiftById(x.shift_id); if (xsh.channel_id !== sh.channel_id) continue;
+    if (rOverlap(r, rangeOf(xsh.label))) return { slot: x, sh: xsh, st: staffById(x.staff_id) };
+  }
+  return null;
+}
+function overlapAlternatives(s) {
+  const sh = shiftById(s.shift_id); const r = rangeOf(sh.label);
+  return [...S.slots.values()].filter(x => x.id !== s.id && x.work_date === s.work_date && x.status === "open")
+    .filter(x => { const xsh = shiftById(x.shift_id); return xsh.channel_id === sh.channel_id && rOverlap(r, rangeOf(xsh.label)) && !overlapTaker(x); })
+    .sort((a, b) => shiftById(a.shift_id).sort_order - shiftById(b.shift_id).sort_order);
+}
+const bookable = s => s && s.status === "open" && s.work_date >= todayStr() && !overlapTaker(s);
+
 function blockerFor(s) {
   if (!s || s.status !== "open") return null;
   const sh = shiftById(s.shift_id); const myP = prioOf(chanById(sh.channel_id)); if (!myP) return null;
   let best = null;
   for (const x of S.slots.values()) {
-    if (x.work_date !== s.work_date || x.status !== "open" || x.id === s.id) continue;
+    if (x.work_date !== s.work_date || x.status !== "open" || x.id === s.id || overlapTaker(x)) continue;
     const xsh = shiftById(x.shift_id); if (xsh.label !== sh.label) continue;
     const p = prioOf(chanById(xsh.channel_id)); if (p && p < myP && (!best || p < best.p)) best = { p, slot: x, ch: chanById(xsh.channel_id) };
   }
@@ -570,12 +665,12 @@ function renderShell() {
   <main class="wrap" id="main"></main>`;
   $("#meBtn").onclick = () => openSheet(`<h3>${esc(S.me.nickname)}</h3><p class="lead">LINE: ${esc(S.me.line_display_name || S.user.user_metadata?.name || "-")} · ${isAdmin() ? "แอดมิน" : "พนักงาน"}</p>
     <div class="btns"><button class="btn" data-close>ปิด</button><button class="btn warn" id="soBtn">ออกจากระบบ</button></div>`) || ($("#soBtn").onclick = signOut);
-  const da = $("#demoAdmin"); if (da) da.onchange = () => { API.demoSetAdmin(da.checked); S.me = { ...S.me, role: da.checked ? "admin" : "staff" }; renderShell(); render(); const l = $("#live"); l.classList.add("on"); l.lastChild.textContent = "อัปเดตสด"; $("#demoAdmin").checked = da.checked; };
+  const da = $("#demoAdmin"); if (da) da.onchange = () => { API.demoSetAdmin(da.checked); setTimeout(() => loadMonth(true), 0); S.me = { ...S.me, role: da.checked ? "admin" : "staff" }; renderShell(); render(); const l = $("#live"); l.classList.add("on"); l.lastChild.textContent = "อัปเดตสด"; $("#demoAdmin").checked = da.checked; };
 }
 
 function render() {
   const main = $("#main"); if (!main) return;
-  const pendingCount = [...S.slots.values()].filter(s => s.status === "pending").length;
+  const pendingCount = [...S.slots.values()].filter(s => s.status === "pending").length + [...S.leaves.values()].filter(l => l.status === "pending").length;
   const tabs = isAdmin() ? [["overview", "ภาพรวม"], ["summary", "สรุปรายคน"]] : [["overview", "ภาพรวม"], ["mine", "กะของฉัน"], ["summary", "สรุปรายคน"]];
   if (S.tab === "mine" && isAdmin()) S.tab = "overview";
   if (isAdmin()) tabs.push(["admin", `แอดมิน${pendingCount ? ` <span class="badge">${pendingCount}</span>` : ""}`]);
@@ -610,6 +705,8 @@ function pill(s, compact) {
   const fl = S.flash.has(s.id) ? " flash" : "";
   if (s.status === "open") {
     if (past) return `<span class="pill p-closed${past}">ว่าง (ผ่านแล้ว)</span>`;
+    const ov = overlapTaker(s);
+    if (ov && !isAdmin()) return `<button class="pill p-full${fl}" data-slot="${s.id}" title="ทับกับกะ ${ov.sh.label} ที่มีคนลงแล้ว">เต็มแล้ว</button>`;
     const bl = !isAdmin() && blockerFor(s);
     if (bl) return `<button class="pill p-wait${fl}" data-slot="${s.id}" title="ต้องลงช่อง ${esc(bl.ch.name)} ก่อน">${compact ? "รอ " + esc(bl.ch.name.split(" ")[0]) : "ว่าง · ลง " + esc(bl.ch.name) + " ก่อน"}</button>`;
     return `<button class="pill p-open${fl}" data-slot="${s.id}">${compact ? "ว่าง" : "ว่าง · จอง"}</button>`;
@@ -621,13 +718,14 @@ function pill(s, compact) {
   const st = staffById(s.staff_id) || { nickname: "?", bg_color: "#999", fg_color: "#fff" };
   const mine = s.staff_id === S.me.id ? " p-mine" : "";
   if (s.status === "pending") return `<${tag} class="pill p-pend${mine}${past}${fl}"${at} title="รออนุมัติ">${esc(st.nickname)} <small>รออนุมัติ</small></${tag}>`;
-  return `<${tag} class="pill p-name${mine}${past}${fl}"${at} style="background:${st.bg_color};color:${st.fg_color}">${esc(st.nickname)}</${tag}>`;
+  const lvTag = (isAdmin() || s.staff_id === S.me.id) && pendingLeaveOf(s.id) ? ` <span class="lvtag">ลา?</span>` : "";
+  return `<${tag} class="pill p-name${mine}${past}${fl}"${at} style="background:${st.bg_color};color:${st.fg_color}">${esc(st.nickname)}${lvTag}</${tag}>`;
 }
 
 function stats() {
   const t = todayStr(); let open = 0, pend = 0, mine = 0, minePend = 0, openToday = 0;
   for (const s of S.slots.values()) {
-    if (s.status === "open" && s.work_date >= t) { open++; if (s.work_date === t) openToday++; }
+    if (bookable(s)) { open++; if (s.work_date === t) openToday++; }
     if (s.status === "pending") pend++;
     if (s.staff_id === S.me.id) { if (s.status === "approved") mine++; else if (s.status === "pending") minePend++; }
   }
@@ -664,7 +762,7 @@ function renderOverview(body) {
   }
   const idx = slotIndex(); const n = daysIn(S.y, S.m); const t = todayStr();
   const dates = []; for (let d = 1; d <= n; d++) { const ds = ymd(S.y, S.m, d); if (idx[ds]) dates.push(ds); }
-  const openCount = ds => Object.values(idx[ds] || {}).filter(s => s.status === "open").length;
+  const openCount = ds => Object.values(idx[ds] || {}).filter(s => s.status === "open" && !overlapTaker(s)).length;
   const shown = S.onlyOpen ? dates.filter(ds => ds >= t && openCount(ds) > 0) : dates;
   if (S.view === "grid") {
     const colsBy = chans.map(c => ({ c, sh: S.shifts.filter(s => s.channel_id === c.id).sort((a, b) => a.sort_order - b.sort_order) }));
@@ -695,24 +793,34 @@ function renderMine(body) {
   const up = mine.filter(s => s.work_date >= t), past = mine.filter(s => s.work_date < t);
   const row = s => { const p = parseD(s.work_date); const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id);
     return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[p.wd]}">${WD[p.wd]}</div><div class="d tnum">${p.d}</div></div>
-      <div class="what"><div class="a">${esc(c.name)} · <span class="tnum">${sh.label}</span></div><div class="b">${thDate(s.work_date)} · ${shiftHours(sh.label).h} ชม.</div></div>
+      <div class="what"><div class="a">${esc(c.name)} · <span class="tnum">${sh.label}</span></div><div class="b">${thDate(s.work_date)} · ${shiftHours(sh.label).h} ชม.</div>${leaveLine(s)}</div>
       ${s.status === "pending" ? `<span class="pill p-pend" style="min-width:0">รออนุมัติ</span>${s.work_date >= t ? `<button class="btn sm warn" data-cancel="${s.id}">ยกเลิก</button>` : ""}` : `<span class="pill p-name" style="min-width:0;background:var(--open-bg);color:var(--open)">อนุมัติแล้ว</span>`}</div>`; };
   const appr = mine.filter(s => s.status === "approved");
   const hOf = s => shiftHours(shiftById(s.shift_id).label).h;
   const sumH = arr => Math.round(arr.reduce((a, s) => a + hOf(s), 0) * 100) / 100;
   const done = appr.filter(s => s.work_date < t), next = appr.filter(s => s.work_date >= t);
   const pendN = mine.length - appr.length;
+  const myLeaves = [...S.leaves.values()].filter(l => l.staff_id === S.me.id && l.status !== "cancelled").sort((a, b) => a.work_date.localeCompare(b.work_date));
+  const leftApproved = myLeaves.filter(l => l.status === "approved").length;
+  const attend = appr.length + leftApproved ? Math.round(appr.length / (appr.length + leftApproved) * 100) : 100;
   body.innerHTML = `<div class="panel"><div class="panel-h"><h3>สรุปของฉัน</h3><span class="sub">${TH_MONTHS[S.m - 1]} ${S.y + 543} · นับเฉพาะกะที่อนุมัติแล้ว</span></div>
     <div class="pstats" style="padding-bottom:14px">
       <div><span>วันที่ทำงาน</span><b class="tnum">${new Set(appr.map(s => s.work_date)).size}</b></div>
       <div><span>จำนวนกะ</span><b class="tnum">${appr.length}</b></div>
       <div><span>ชั่วโมงรวม</span><b class="tnum">${sumH(appr)}</b></div>
       ${pendN ? `<div><span>รออนุมัติ</span><b class="tnum" style="color:var(--pending)">${pendN}</b></div>` : ""}
+      <div><span>เข้ากะตามตาราง</span><b class="tnum" style="color:${attend === 100 ? "var(--open)" : "var(--ink)"}">${attend}%</b></div>
     </div>
     <div class="note" style="padding:0 16px 14px;margin:0">ทำไปแล้ว ${done.length} กะ (${sumH(done)} ชม.) · ที่จะถึง ${next.length} กะ (${sumH(next)} ชม.)</div></div>
     <div class="panel"><div class="panel-h"><h3>กะที่จะถึง</h3><span class="sub">${up.length} กะ</span></div>${up.map(row).join("") || `<div class="empty">ยังไม่มีกะที่จะถึงในเดือนนี้ — ไปที่ "ภาพรวม" แล้วกดช่องสีเขียวเพื่อจอง</div>`}</div>
-    ${past.length ? `<div class="panel"><div class="panel-h"><h3>ผ่านไปแล้ว</h3><span class="sub">${past.length} กะ</span></div>${past.map(row).join("")}</div>` : ""}`;
+    ${past.length ? `<div class="panel"><div class="panel-h"><h3>ผ่านไปแล้ว</h3><span class="sub">${past.length} กะ</span></div>${past.map(row).join("")}</div>` : ""}
+    ${myLeaves.length ? `<div class="panel"><div class="panel-h"><h3>การแจ้งลาของฉัน</h3><span class="sub">${TH_MONTHS[S.m - 1]}</span></div>${myLeaves.map(l => { const p = parseD(l.work_date);
+      return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[p.wd]}">${WD[p.wd]}</div><div class="d tnum">${p.d}</div></div>
+      <div class="what"><div class="a">${LEAVE_TXT[l.leave_type]} · ${esc(l.channel_name)} <span class="tnum">${l.shift_label}</span></div><div class="b">${esc(l.reason || "")}</div></div>
+      <span class="lv-st lv-${l.status}">${LEAVE_STATUS[l.status]}</span></div>`; }).join("")}</div>` : ""}`;
   body.querySelectorAll("[data-cancel]").forEach(b => b.onclick = () => confirmCancel(+b.dataset.cancel));
+  body.querySelectorAll("[data-leave]").forEach(b => b.onclick = e => { e.preventDefault(); leaveFlow(S.slots.get(+b.dataset.leave)); });
+  body.querySelectorAll("[data-cancel-leave]").forEach(b => b.onclick = e => { e.preventDefault(); cancelLeave(+b.dataset.cancelLeave); });
 }
 
 function renderSummary(body) {
@@ -745,13 +853,17 @@ function renderPerson(box) {
   const days = new Set(appr.map(x => x.s.work_date)).size;
   const hrs = appr.reduce((a, x) => a + x.h, 0);
   const byDay = {}; mine.forEach(x => (byDay[x.s.work_date] ||= []).push(x));
+  const lvs = [...S.leaves.values()].filter(l => l.staff_id === p.id && l.status === "approved");
+  const lvByDay = {}; lvs.forEach(l => (lvByDay[l.work_date] ||= []).push(l));
+  const lvCount = t => lvs.filter(l => l.leave_type === t).length;
   const byCh = {}; appr.forEach(x => { const o = (byCh[x.c.id] ||= { c: x.c, n: 0, h: 0 }); o.n++; o.h += x.h; });
   const short = c => c.name.split(/[\s/]/)[0];
   const first = parseD(ymd(S.y, S.m, 1)).wd;
   let cells = ""; for (let i = 0; i < first; i++) cells += `<div class="cal-d empty"></div>`;
   for (let d = 1; d <= n; d++) {
-    const ds = ymd(S.y, S.m, d); const wd = parseD(ds).wd; const list = byDay[ds] || [];
+    const ds = ymd(S.y, S.m, d); const wd = parseD(ds).wd; const list = byDay[ds] || []; const ll = lvByDay[ds] || [];
     cells += `<div class="cal-d ${list.length ? "has" : ""} ${ds === t ? "today" : ""}"><div class="cal-n" style="color:${WD_COLOR[wd]}">${d}</div>
+      ${ll.map(l => `<div class="cal-chip lv" title="${LEAVE_TXT[l.leave_type]} ${esc(l.channel_name)} ${l.shift_label}"><b>${LEAVE_TXT[l.leave_type].replace(" 2 วัน", "")}</b> <span>${l.shift_label}</span></div>`).join("")}
       ${list.map(x => `<div class="cal-chip ${x.s.status === "pending" ? "pend" : ""}" style="background:${x.c.color}" title="${esc(x.c.name)} ${x.sh.label}${x.s.status === "pending" ? " (รออนุมัติ)" : ""}"><b>${esc(short(x.c))}</b> <span>${x.sh.label}</span></div>`).join("")}</div>`;
   }
   box.innerHTML = `<div class="panel" style="margin-top:14px">
@@ -761,17 +873,27 @@ function renderPerson(box) {
       <div><span>จำนวนกะ</span><b class="tnum">${appr.length}</b></div>
       <div><span>ชั่วโมงรวม</span><b class="tnum">${hrs}</b></div>
       ${mine.length - appr.length ? `<div><span>รออนุมัติ</span><b class="tnum" style="color:var(--pending)">${mine.length - appr.length}</b></div>` : ""}
+      <div><span>ลา</span><b class="tnum">${lvs.length}</b></div>
     </div>
+    ${lvs.length ? `<div class="chsum"><span>ลาป่วย ${lvCount("sick")}</span><span>ลากะทันหัน ${lvCount("sudden")}</span><span>ลาล่วงหน้า 2 วัน ${lvCount("advance")}</span></div>` : ""}
     ${Object.values(byCh).length ? `<div class="chsum">${Object.values(byCh).sort((a, b) => a.c.sort_order - b.c.sort_order).map(o => `<span><i style="background:${o.c.color}"></i>${esc(o.c.name)} · ${o.n} กะ · ${o.h} ชม.</span>`).join("")}</div>` : ""}
     <div class="cal"><div class="cal-h">${WD_S.map((w, i) => `<div style="color:${WD_COLOR[i]}">${w}</div>`).join("")}</div><div class="cal-g">${cells}</div></div>
-    <div class="plist">${mine.map(x => { const d = parseD(x.s.work_date); return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[d.wd]}">${WD[d.wd]}</div><div class="d tnum">${d.d}</div></div>
+    <div class="plist">${lvs.map(l => { const d = parseD(l.work_date); return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[d.wd]}">${WD[d.wd]}</div><div class="d tnum">${d.d}</div></div><div class="what"><div class="a">${LEAVE_TXT[l.leave_type]} · ${esc(l.channel_name)} <span class="tnum">${l.shift_label}</span></div><div class="b">${esc(l.reason || "")}</div></div></div>`; }).join("")}${mine.map(x => { const d = parseD(x.s.work_date); return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[d.wd]}">${WD[d.wd]}</div><div class="d tnum">${d.d}</div></div>
       <div class="what"><div class="a"><i class="dot" style="background:${x.c.color}"></i>${esc(x.c.name)} · <span class="tnum">${x.sh.label}</span></div><div class="b">${x.h} ชม.${x.s.status === "pending" ? " · <span style='color:var(--pending)'>รออนุมัติ</span>" : ""}</div></div></div>`; }).join("") || `<div class="empty">เดือนนี้ยังไม่มีกะ</div>`}</div>
   </div>`;
 }
 
 function renderAdmin(body) {
   const pend = [...S.slots.values()].filter(s => s.status === "pending").sort((a, b) => (a.requested_at || "").localeCompare(b.requested_at || ""));
+  const lvPend = [...S.leaves.values()].filter(l => l.status === "pending").sort((a, b) => a.work_date.localeCompare(b.work_date));
   body.innerHTML = `
+  ${lvPend.length ? `<div class="panel"><div class="panel-h"><h3>คำขอลา</h3><span class="sub">${lvPend.length} รายการ</span></div>
+    ${lvPend.map(l => { const p = parseD(l.work_date); const st = staffById(l.staff_id); const hrsLeft = Math.round((Date.parse(l.shift_start) - Date.now()) / 3600e3);
+      return `<div class="li"><div class="when"><div class="w" style="color:${WD_COLOR[p.wd]}">${WD[p.wd]}</div><div class="d tnum">${p.d}</div></div>
+      <div class="what"><div class="a"><span class="pill p-name" style="min-width:0;height:24px;font-size:12.5px;background:${st?.bg_color};color:${st?.fg_color}">${esc(st?.nickname)}</span> <span class="lv-st lv-pending">${LEAVE_TXT[l.leave_type]}</span> ${esc(l.channel_name)} · <span class="tnum">${l.shift_label}</span> · ${Number(l.hours)} ชม.</div>
+      <div class="b">"${esc(l.reason || "-")}" · แจ้ง${hrsLeft > 0 ? `ก่อนเริ่มกะ ${hrsLeft >= 48 ? Math.floor(hrsLeft / 24) + " วัน" : hrsLeft + " ชม."}` : "หลังกะเริ่ม"}</div></div>
+      <div class="row-actions"><button class="btn sm warn" data-lrj="${l.id}">ไม่อนุมัติ</button><button class="btn sm go" data-lap="${l.id}">อนุมัติลา</button></div></div>`; }).join("")}
+  </div>` : ""}
   <div class="panel"><div class="panel-h"><h3>คำขอรออนุมัติ</h3><span class="sub">${pend.length} รายการ</span>
     ${pend.length > 1 ? `<div class="spacer"></div><button class="btn sm go" id="apAll">อนุมัติทั้งหมด</button>` : ""}</div>
     ${pend.map(s => { const p = parseD(s.work_date); const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id); const st = staffById(s.staff_id);
@@ -787,7 +909,7 @@ function renderAdmin(body) {
       <button class="btn sm" data-es="${s.id}">แก้ไข</button></div>`).join("")}</div></div>
   <div class="panel"><div class="panel-h"><h3>ตารางเดือน</h3></div><div style="padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn" id="gen">เติมช่องที่ยังไม่มีของ ${TH_MONTHS[S.m - 1]} ${S.y + 543}</button><span class="note" style="margin:0">สร้างช่องสถานะ "ว่าง" ให้ทุกวัน/ทุกกะที่ยังไม่มี (ช่องเดิมไม่ถูกแก้)</span></div></div>
-  <div class="panel"><div class="panel-h"><h3>Export ข้อมูลทำเงินเดือน</h3><span class="sub">ไฟล์ Excel: สรุปรายคน + รายละเอียดทุกกะ</span></div>
+  <div class="panel"><div class="panel-h"><h3>Export ข้อมูลทำเงินเดือน</h3><span class="sub">ไฟล์ Excel: สรุปรายคน + รายละเอียดทุกกะ + การลา</span></div>
     <div style="padding:14px 16px">
       <div class="seg" style="margin-bottom:12px"><button data-xr="a">1–15 ${TH_MON_S[S.m - 1]}</button><button data-xr="b">16–${daysIn(S.y, S.m)} ${TH_MON_S[S.m - 1]}</button><button data-xr="all">ทั้งเดือน</button></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -804,6 +926,8 @@ function renderAdmin(body) {
   });
   $("#xGo").onclick = () => exportPayroll($("#xFrom").value, $("#xTo").value, $("#xPend").checked);
   body.querySelectorAll("[data-ap]").forEach(b => b.onclick = () => review(+b.dataset.ap, true));
+  body.querySelectorAll("[data-lap]").forEach(b => b.onclick = () => reviewLeave(+b.dataset.lap, true));
+  body.querySelectorAll("[data-lrj]").forEach(b => b.onclick = () => reviewLeave(+b.dataset.lrj, false));
   body.querySelectorAll("[data-rj]").forEach(b => b.onclick = () => review(+b.dataset.rj, false));
   body.querySelectorAll("[data-es]").forEach(b => b.onclick = () => editStaff(b.dataset.es));
   $("#addStaff").onclick = () => editStaff(null);
@@ -831,9 +955,10 @@ async function exportPayroll(from, to, inclPending) {
   if (!from || !to || from > to) return toast("ช่วงวันที่ไม่ถูกต้อง", "err");
   const btn = $("#xGo"); btn.disabled = true; btn.textContent = "กำลังสร้างไฟล์…";
   try {
-    const [rows] = await Promise.all([API.loadRange(from, to), loadXLSX()]);
+    const [rows, lvAll] = await Promise.all([API.loadRange(from, to), API.loadLeaves(from, to), loadXLSX()]);
     const use = rows.filter(s => s.status === "approved" || (inclPending && s.status === "pending"));
-    if (!use.length) throw new Error("ไม่มีกะที่มีชื่อพนักงานในช่วงนี้");
+    const lvUse = lvAll.filter(l => l.status === "approved");
+    if (!use.length && !lvUse.length) throw new Error("ไม่มีกะที่มีชื่อพนักงานในช่วงนี้");
     const chans = [...S.channels].sort((a, b) => a.sort_order - b.sort_order);
     const detail = use.map(s => {
       const sh = shiftById(s.shift_id); const c = chanById(sh.channel_id); const st = staffById(s.staff_id) || {}; const hh = shiftHours(sh.label); const p = parseD(s.work_date);
@@ -846,9 +971,15 @@ async function exportPayroll(from, to, inclPending) {
       o["จำนวนกะ"]++; o["ชั่วโมงรวม"] += r["ชั่วโมง"]; o._days.add(r["วันที่"]);
       o[`${r["ช่อง"]} (กะ)`] = (o[`${r["ช่อง"]} (กะ)`] || 0) + 1; o[`${r["ช่อง"]} (ชม.)`] = (o[`${r["ช่อง"]} (ชม.)`] || 0) + r["ชั่วโมง"];
     }
+    for (const l of lvUse) {
+      const nm = staffById(l.staff_id)?.nickname || "?";
+      const o = (per[nm] ||= { "พนักงาน": nm, "จำนวนกะ": 0, "ชั่วโมงรวม": 0, _days: new Set() });
+      const k = LEAVE_TXT[l.leave_type]; o[`${k} (ครั้ง)`] = (o[`${k} (ครั้ง)`] || 0) + 1; o[`${k} (ชม.)`] = (o[`${k} (ชม.)`] || 0) + Number(l.hours);
+    }
     const sum = Object.values(per).sort((a, b) => b["ชั่วโมงรวม"] - a["ชั่วโมงรวม"]).map(o => {
       const r = { "พนักงาน": o["พนักงาน"], "จำนวนวันที่ทำงาน": o._days.size, "จำนวนกะ": o["จำนวนกะ"], "ชั่วโมงรวม": o["ชั่วโมงรวม"] };
       for (const c of chans) { r[`${c.name} (กะ)`] = o[`${c.name} (กะ)`] || 0; r[`${c.name} (ชม.)`] = o[`${c.name} (ชม.)`] || 0; }
+      for (const k of ["sick", "sudden", "advance"]) { const t = LEAVE_TXT[k]; r[`${t} (ครั้ง)`] = o[`${t} (ครั้ง)`] || 0; r[`${t} (ชม.)`] = o[`${t} (ชม.)`] || 0; }
       return r;
     });
     const wb = XLSX.utils.book_new();
@@ -856,6 +987,13 @@ async function exportPayroll(from, to, inclPending) {
     const ws2 = XLSX.utils.json_to_sheet(detail); ws2["!cols"] = [12, 9, 16, 13, 7, 7, 8, 14, 12, 20].map(w => ({ wch: w }));
     XLSX.utils.book_append_sheet(wb, ws1, "สรุปรายคน");
     XLSX.utils.book_append_sheet(wb, ws2, "รายละเอียดกะ");
+    const lvRows = lvUse.sort((a, b) => a.work_date.localeCompare(b.work_date)).map(l => ({ "วันที่": l.work_date, "วัน": WD[parseD(l.work_date).wd], "พนักงาน": staffById(l.staff_id)?.nickname || "?",
+      "ประเภท": LEAVE_TXT[l.leave_type], "ช่อง": l.channel_name, "กะ": l.shift_label, "ชั่วโมง": Number(l.hours), "เหตุผล": l.reason || "",
+      "แจ้งเมื่อ": new Date(l.requested_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }), "แจ้งก่อนเริ่มกะ (ชม.)": l.shift_start ? Math.round((Date.parse(l.shift_start) - Date.parse(l.requested_at)) / 3600e3) : "",
+      "บันทึกโดยแอดมิน": l.recorded_by_admin ? "ใช่" : "" }));
+    const ws3 = XLSX.utils.json_to_sheet(lvRows.length ? lvRows : [{ "วันที่": "", "พนักงาน": "ไม่มีการลาในช่วงนี้" }]);
+    ws3["!cols"] = [12, 9, 14, 16, 16, 13, 8, 30, 20, 18, 14].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws3, "การลา");
     XLSX.writeFile(wb, `ตารางไลฟ์_${from}_ถึง_${to}.xlsx`);
     toast(`ดาวน์โหลดแล้ว ${detail.length} กะ / ${sum.length} คน`, "ok");
   } catch (e) { toast(e.message, "err"); }
@@ -903,6 +1041,16 @@ function openSlot(id) {
   const s = S.slots.get(id); if (!s) return;
   const past = s.work_date < todayStr();
   if (s.status === "open" && !past && !isAdmin()) {
+    const ov = overlapTaker(s);
+    if (ov) {
+      const alts = overlapAlternatives(s).filter(x => !blockerFor(x));
+      openSheet(`<h3>กะนี้เต็มแล้ว</h3>
+        <p class="lead">${esc(chanById(shiftById(s.shift_id).channel_id).name)} วันเดียวกัน กะ <b>${ov.sh.label}</b> มี <b>${esc(ov.st?.nickname || "คน")}</b> ลงไว้แล้ว${ov.slot.status === "pending" ? " (รออนุมัติ)" : ""} จึงลงกะ <b>${shiftById(s.shift_id).label}</b> ไม่ได้${alts.length ? `<br>ลงกะ <b>${alts.map(a => shiftById(a.shift_id).label).join(", ")}</b> แทนได้` : ""}</p>
+        ${ticket(s)}
+        <div class="btns"><button class="btn" data-close>ปิด</button>${alts.length ? `<button class="btn go" id="goAlt">จองกะ ${shiftById(alts[0].shift_id).label} แทน</button>` : ""}</div>`);
+      const g = $("#goAlt"); if (g) g.onclick = () => bookFlow(alts[0]);
+      return;
+    }
     const bl = blockerFor(s);
     if (bl) {
       openSheet(`<h3>ต้องลงช่อง ${esc(bl.ch.name)} ก่อน</h3>
@@ -950,19 +1098,80 @@ function confirmCancel(id) {
   $("#cx").onclick = async () => { try { const r = await API.rpc("cancel_booking", { p_slot_id: id }); if (r && r.id) S.slots.set(r.id, r); closeSheet(); render(); toast("ยกเลิกแล้ว"); } catch (e) { toast(e.message, "err"); } };
 }
 
+/* ===== Leave ===== */
+function leaveLine(s) {
+  if (s.status !== "approved") return "";
+  const pl = pendingLeaveOf(s.id);
+  if (pl) return `<div class="lv-line"><span class="lv-st lv-pending">แจ้ง${LEAVE_TXT[pl.leave_type]} · รออนุมัติ</span> <a href="#" class="lv-link" data-cancel-leave="${pl.id}">ยกเลิกการลา</a></div>`;
+  if (shiftStartMs(s) <= Date.now()) return "";
+  return `<div class="lv-line"><a href="#" class="lv-link" data-leave="${s.id}">ไม่สะดวกเข้ากะนี้?</a></div>`;
+}
+
+function leaveFlow(s) {
+  if (!s) return;
+  const sh = shiftById(s.shift_id); const h = shiftHours(sh.label).h;
+  const hoursLeft = (shiftStartMs(s) - Date.now()) / 3600e3;
+  const advanceOk = hoursLeft >= 48;
+  let type = null;
+  openSheet(`<h3>แจ้งลา</h3><p class="lead">เลือกประเภทการลาและใส่เหตุผล แอดมินจะตรวจสอบก่อนอนุมัติ</p>${ticket(s)}
+    <div class="lv-opts">${["sick", "sudden", "advance"].map(k => {
+      const dis = k === "advance" && !advanceOk;
+      return `<label class="lv-opt ${dis ? "dis" : ""}"><input type="radio" name="lvt" value="${k}" ${dis ? "disabled" : ""}><span><b>${LEAVE_TXT[k]}</b><small>${dis ? `ต้องแจ้งก่อนเริ่มกะ 48 ชม. (เหลือ ${Math.max(0, Math.floor(hoursLeft))} ชม.)` : LEAVE_DESC[k]}</small></span></label>`; }).join("")}</div>
+    <label class="field">เหตุผล<input type="text" id="lvReason" maxlength="200" placeholder="เช่น มีสอบ, ไข้ขึ้น"></label>
+    <div class="lv-impact">กะนี้ <b>${h} ชม.</b> จะไม่ถูกนับ และการลามีผลต่อเงินพิเศษ</div>
+    <p class="note" style="margin:0 0 14px">ระหว่างรออนุมัติ กะนี้ยังเป็นของคุณ ถ้าอนุมัติ ช่องจะเปิดให้คนอื่นจองแทน</p>
+    <div class="btns"><button class="btn" data-close>ไม่ลาแล้ว</button><button class="btn pri" id="lvGo" disabled>ยืนยันแจ้งลา</button></div>`);
+  const upd = () => { $("#lvGo").disabled = !(type && $("#lvReason").value.trim().length >= 2); };
+  document.querySelectorAll("input[name=lvt]").forEach(r => r.onchange = () => { type = r.value; upd(); });
+  $("#lvReason").oninput = upd;
+  $("#lvGo").onclick = async () => {
+    $("#lvGo").disabled = true; $("#lvGo").textContent = "กำลังส่ง…";
+    try { const r = await API.rpc("request_leave", { p_slot_id: s.id, p_type: type, p_reason: $("#lvReason").value.trim() }); if (r && r.id) S.leaves.set(r.id, r); closeSheet(); render(); toast("ส่งคำขอลาแล้ว รอแอดมินอนุมัติ", "ok"); }
+    catch (e) { toast(e.message, "err"); $("#lvGo").disabled = false; $("#lvGo").textContent = "ยืนยันแจ้งลา"; }
+  };
+}
+
+async function cancelLeave(id) {
+  try { const r = await API.rpc("cancel_leave", { p_leave_id: id }); if (r && r.id) S.leaves.set(r.id, r); render(); toast("ยกเลิกการลาแล้ว กะยังเป็นของคุณ"); }
+  catch (e) { toast(e.message, "err"); }
+}
+
+async function reviewLeave(id, approve) {
+  try { const r = await API.rpc("admin_review_leave", { p_leave_id: id, p_approve: approve }); if (r && r.id) S.leaves.set(r.id, r); closeSheet(); render(); toast(approve ? "อนุมัติการลาแล้ว — ช่องเปิดให้จองแทน" : "ไม่อนุมัติการลา — กะยังเป็นของพนักงาน", approve ? "ok" : ""); }
+  catch (e) { toast(e.message, "err"); }
+}
+
+function adminRecordLeave(s) {
+  const st = staffById(s.staff_id); let type = null;
+  openSheet(`<h3>บันทึกการลาแทน ${esc(st?.nickname || "")}</h3><p class="lead">ใช้เมื่อพนักงานแจ้งลาทาง LINE หรือช่องทางอื่น · มีผลทันที</p>${ticket(s)}
+    <div class="lv-opts">${["sick", "sudden", "advance"].map(k => `<label class="lv-opt"><input type="radio" name="lvt" value="${k}"><span><b>${LEAVE_TXT[k]}</b><small>${LEAVE_DESC[k]}</small></span></label>`).join("")}</div>
+    <label class="field">หมายเหตุ (ไม่บังคับ)<input type="text" id="lvReason" maxlength="200"></label>
+    <div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn pri" id="lvGo" disabled>บันทึกการลา</button></div>`);
+  document.querySelectorAll("input[name=lvt]").forEach(r => r.onchange = () => { type = r.value; $("#lvGo").disabled = false; });
+  $("#lvGo").onclick = async () => {
+    try { const r = await API.rpc("admin_record_leave", { p_slot_id: s.id, p_type: type, p_reason: $("#lvReason").value.trim() }); if (r && r.id) S.leaves.set(r.id, r); closeSheet(); render(); toast("บันทึกการลาแล้ว — ช่องเปิดให้จองแทน", "ok"); }
+    catch (e) { toast(e.message, "err"); }
+  };
+}
+
 function adminSlot(s) {
   const opts = S.staff.filter(x => (x.active && x.role !== "admin") || x.id === s.staff_id).map(x => `<option value="${x.id}" ${x.id === s.staff_id ? "selected" : ""}>${esc(x.nickname)}</option>`).join("");
   const cur = ["approved", "pending"].includes(s.status) ? "assign" : s.status;
   openSheet(`<h3>จัดการช่อง</h3><p class="lead">สิทธิ์แอดมิน</p>${ticket(s)}
     ${s.status === "pending" ? `<div class="btns" style="margin-bottom:6px"><button class="btn warn" id="rj">ปฏิเสธ</button><button class="btn go" id="ap">อนุมัติคำขอ</button></div><hr class="sep">` : ""}
+    ${(() => { const pl = pendingLeaveOf(s.id); return pl ? `<div class="lv-impact"><b>${esc(staffById(pl.staff_id)?.nickname || "")}</b> แจ้ง${LEAVE_TXT[pl.leave_type]}: "${esc(pl.reason || "-")}"</div>
+      <div class="btns" style="margin-bottom:6px"><button class="btn warn" id="lrj">ไม่อนุมัติลา</button><button class="btn go" id="lap">อนุมัติลา</button></div><hr class="sep">` : ""; })()}
     <label class="field">ตั้งสถานะ<select id="as">
       <option value="open" ${cur === "open" ? "selected" : ""}>ว่าง (เปิดให้จอง)</option>
       <option value="full" ${cur === "full" ? "selected" : ""}>เต็มแล้ว</option>
       <option value="closed" ${cur === "closed" ? "selected" : ""}>ไม่รับคน</option>
       <option value="assign" ${cur === "assign" ? "selected" : ""}>ลงชื่อพนักงาน (อนุมัติทันที)</option></select></label>
     <label class="field ${cur === "assign" ? "" : "hidden"}" id="asw">พนักงาน<select id="ast"><option value="">— เลือก —</option>${opts}</select></label>
-    <div class="btns"><button class="btn" data-close>ปิด</button><button class="btn pri" id="asv">บันทึก</button></div>`);
+    <div class="btns"><button class="btn" data-close>ปิด</button><button class="btn pri" id="asv">บันทึก</button></div>
+    ${s.staff_id && ["approved", "pending"].includes(s.status) ? `<div style="text-align:center;margin-top:12px"><a href="#" class="lv-link" id="recLeave">บันทึกการลาแทน ${esc(staffById(s.staff_id)?.nickname || "")}</a></div>` : ""}`);
   $("#as").onchange = e => $("#asw").classList.toggle("hidden", e.target.value !== "assign");
+  { const pl = pendingLeaveOf(s.id); if (pl) { $("#lap").onclick = () => reviewLeave(pl.id, true); $("#lrj").onclick = () => reviewLeave(pl.id, false); } }
+  { const rl = $("#recLeave"); if (rl) rl.onclick = e => { e.preventDefault(); adminRecordLeave(s); }; }
   const ap = $("#ap"); if (ap) { ap.onclick = () => review(s.id, true); $("#rj").onclick = () => review(s.id, false); }
   $("#asv").onclick = async () => {
     const v = $("#as").value; const st = $("#ast").value;
