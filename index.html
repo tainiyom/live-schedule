@@ -220,6 +220,20 @@ table.g .pill{min-width:84px;height:26px;font-size:12.5px;padding:0 9px}
 @media (min-width:641px){.plist{display:none}}
 
 @media (max-width:640px){.li{flex-wrap:wrap}.li .row-actions{width:100%;padding-left:74px;justify-content:flex-start}.li .row-actions .btn{flex:1}}
+/* audit log */
+.logf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0 12px;padding:14px 16px 0}
+.logf select{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px;font-size:14px}
+.loglist{border-top:1px solid var(--line)}
+.logd{padding:10px 16px 4px;font-size:12.5px;font-weight:700;color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--line)}
+.logr{display:flex;gap:10px;align-items:baseline;padding:8px 16px;border-bottom:1px solid var(--line);font-size:14px}
+.logr .lt{flex:0 0 auto;width:92px;color:var(--ink-3);font-size:12.5px}
+.logr .lx{flex:1;min-width:0;line-height:1.5}
+.logr .lx s{color:var(--ink-3)}
+.logr .lx b.be{color:var(--pending)}
+.logr .lc{flex:0 0 auto;font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:99px;padding:1px 7px}
+.sheet .loglist{max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.sheet .logr .lt{width:auto}
+@media (max-width:640px){.logr{flex-wrap:wrap;gap:2px 10px}.logr .lt{width:auto}.logr .lx{flex-basis:100%;order:3}}
 /* leave */
 .lv-line{margin-top:4px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .lv-link{color:var(--ink-3);text-decoration:underline;text-underline-offset:2px}
@@ -362,6 +376,12 @@ function makeLiveApi() {
       }
       return out;
     },
+    async loadAudit(fromIso, toIso, beforeId) {
+      let q = sb.from("audit_log").select("*").gte("at", fromIso).lt("at", toIso).order("id", { ascending: false }).limit(400);
+      if (beforeId) q = q.lt("id", beforeId);
+      const { data, error } = await q; if (error) throw error; return data;
+    },
+    async slotHistory(id) { const { data, error } = await sb.rpc("slot_history", { p_slot_id: id }); if (error) throw error; return data; },
     async loadLeaves(from, to) {
       const { data, error } = await sb.from("leaves").select("*").gte("work_date", from).lte("work_date", to).order("requested_at");
       if (error) throw error; return data;
@@ -394,7 +414,7 @@ function makeDemoApi() {
     if (sl) setTimeout(() => mkLeave(sl, risa, "sick", "ไข้ขึ้น ปวดหัวมาก"), 0); }
   let listener = null; const emit = (row, old) => listener && setTimeout(() => listener("slots", { eventType: "UPDATE", new: { ...row }, old }), 120);
   const emitL = (row, type = "UPDATE") => listener && setTimeout(() => listener("leaves", { eventType: type, new: { ...row } }), 120);
-  D.leaves = []; let leaveId = 1;
+  D.leaves = []; let leaveId = 1; D.audit = []; let auditId = 0;
   const mkLeave = (slot, staffId, type, reason, status = "pending", byAdmin = false) => {
     const sh = D.shifts.find(x => x.id === slot.shift_id); const c = D.channels.find(x => x.id === sh.channel_id);
     const r = { id: leaveId++, slot_id: slot.id, staff_id: staffId, leave_type: type, reason, status, work_date: slot.work_date, shift_label: sh.label,
@@ -446,7 +466,21 @@ function makeDemoApi() {
     async loadMonth(y, m) { const p = `${y}-${pad(m)}-`; return D.slots.filter(s => s.work_date.startsWith(p)).map(s => ({ ...s })); },
     async loadRange(from, to) { return D.slots.filter(s => s.staff_id && s.work_date >= from && s.work_date <= to).map(s => ({ ...s })); },
     async loadLeaves(from, to) { const adm = meRow().role === "admin"; return D.leaves.filter(l => l.work_date >= from && l.work_date <= to && (adm || l.staff_id === meId)).map(l => ({ ...l })); },
-    async rpc(name, args) { await new Promise(r => setTimeout(r, 250)); return fns[name](args || {}); },
+    async rpc(name, args) {
+      await new Promise(r => setTimeout(r, 250));
+      const snap = t => new Map(D[t].map(x => [String(x.id), JSON.stringify(x)]));
+      const before = { slots: snap("slots"), leaves: snap("leaves"), staff: snap("staff") };
+      const res = fns[name](args || {});
+      const me = meRow();
+      for (const t of ["slots", "leaves", "staff"]) for (const x of D[t]) {
+        const o = before[t].get(String(x.id)); const nj = JSON.stringify(x); if (o === nj) continue;
+        const od = o ? JSON.parse(o) : null; const changed = od ? Object.keys(x).filter(k => JSON.stringify(od[k]) !== JSON.stringify(x[k])) : null;
+        D.audit.unshift({ id: ++auditId, at: new Date().toISOString(), table_name: t, op: od ? "UPDATE" : "INSERT", row_id: String(x.id), actor_staff: me.id, actor_name: me.nickname, source: "app", old_data: od, new_data: JSON.parse(nj), changed });
+      }
+      return res;
+    },
+    async loadAudit(fromIso, toIso, beforeId) { return D.audit.filter(a => a.at >= fromIso && a.at < toIso && (!beforeId || a.id < beforeId)).slice(0, 400); },
+    async slotHistory(id) { return D.audit.filter(a => (a.table_name === "slots" && a.row_id === String(id)) || (a.table_name === "leaves" && String((a.new_data || a.old_data).slot_id) === String(id))); },
     subscribe(onEvt, onStatus) { listener = onEvt; setTimeout(() => onStatus(true), 400); },
     async signOut() { location.href = location.pathname; }
   };
@@ -673,7 +707,8 @@ function render() {
   const pendingCount = [...S.slots.values()].filter(s => s.status === "pending").length + [...S.leaves.values()].filter(l => l.status === "pending").length;
   const tabs = isAdmin() ? [["overview", "ภาพรวม"], ["summary", "สรุปรายคน"]] : [["overview", "ภาพรวม"], ["mine", "กะของฉัน"], ["summary", "สรุปรายคน"]];
   if (S.tab === "mine" && isAdmin()) S.tab = "overview";
-  if (isAdmin()) tabs.push(["admin", `แอดมิน${pendingCount ? ` <span class="badge">${pendingCount}</span>` : ""}`]);
+  if (isAdmin()) { tabs.push(["admin", `แอดมิน${pendingCount ? ` <span class="badge">${pendingCount}</span>` : ""}`]); tabs.push(["log", "ประวัติ"]); }
+  if (S.tab === "log" && !isAdmin()) S.tab = "overview";
   if (S.tab === "admin" && !isAdmin()) S.tab = "overview";
   main.innerHTML = `
     <div class="head">
@@ -688,6 +723,7 @@ function render() {
   if (S.tab === "overview") renderOverview(body);
   else if (S.tab === "mine") renderMine(body);
   else if (S.tab === "summary") renderSummary(body);
+  else if (S.tab === "log") renderLog(body);
   else renderAdmin(body);
   body.querySelectorAll("[data-slot]").forEach(b => b.onclick = () => openSlot(+b.dataset.slot));
 }
@@ -1098,6 +1134,138 @@ function confirmCancel(id) {
   $("#cx").onclick = async () => { try { const r = await API.rpc("cancel_booking", { p_slot_id: id }); if (r && r.id) S.slots.set(r.id, r); closeSheet(); render(); toast("ยกเลิกแล้ว"); } catch (e) { toast(e.message, "err"); } };
 }
 
+/* ===== Audit log ===== */
+const LOG_CAT = { slots: "กะ", leaves: "การลา", staff: "พนักงาน", channels: "ตั้งค่า", shifts: "ตั้งค่า", app_config: "ตั้งค่า" };
+const shortDate = ds => { if (!ds) return ""; const p = parseD(ds); return `${WD_S[p.wd]} ${p.d} ${TH_MON_S[p.m - 1]}`; };
+const nameOf = id => id ? (staffById(id)?.nickname || "?") : "";
+function slotDesc(d) { if (!d) return ""; const sh = shiftById(d.shift_id); const c = sh && chanById(sh.channel_id); return `${c ? c.name : "?"} ${sh ? sh.label : ""} · ${shortDate(d.work_date)}`; }
+function slotState(d) {
+  if (!d) return "-";
+  return { open: "ว่าง", full: "เต็มแล้ว", closed: "ไม่รับคน", pending: `${nameOf(d.staff_id)} (รออนุมัติ)`, approved: nameOf(d.staff_id) }[d.status] || d.status;
+}
+function describeLog(e) {
+  const o = e.old_data || {}, n = e.new_data || {}; const ch = e.changed || [];
+  const actor = e.actor_name || (e.source === "backend" ? "ระบบหลังบ้าน" : "ไม่ทราบ");
+  let text = "";
+  if (e.table_name === "slots") {
+    if (e.op === "INSERT") text = `สร้างช่อง ${slotDesc(n)} (${slotState(n)})`;
+    else if (e.op === "DELETE") text = `ลบช่อง ${slotDesc(o)}`;
+    else {
+      let verb = "แก้ไขช่อง";
+      if (o.status === "open" && n.status === "pending" && n.staff_id === e.actor_staff) verb = "จองกะ";
+      else if (o.status === "pending" && n.status === "approved") verb = "อนุมัติการจอง";
+      else if (o.status === "pending" && n.status === "open") verb = o.staff_id === e.actor_staff ? "ยกเลิกการจอง" : "ปฏิเสธการจอง";
+      else if (o.status === "approved" && n.status === "open") verb = "เอาชื่อออก";
+      else if (n.status === "approved" && o.staff_id !== n.staff_id) verb = "ลงชื่อ";
+      text = `${verb} — ${slotDesc(n)}: <s>${esc(slotState(o))}</s> → <b>${esc(slotState(n))}</b>`;
+      return { actor, text, cat: "กะ" };
+    }
+  } else if (e.table_name === "leaves") {
+    const d = e.op === "DELETE" ? o : n; const lt = LEAVE_TXT[d.leave_type] || "ลา";
+    const what = `${esc(d.channel_name)} ${d.shift_label} · ${shortDate(d.work_date)}`;
+    if (e.op === "INSERT") text = d.recorded_by_admin ? `บันทึก${lt}แทน <b>${esc(nameOf(d.staff_id))}</b> — ${what}` : `แจ้ง${lt} — ${what}${d.reason ? ` · "${esc(d.reason)}"` : ""}`;
+    else if (ch.includes("status")) {
+      text = { approved: `อนุมัติ${lt}ของ <b>${esc(nameOf(d.staff_id))}</b> — ${what}`, rejected: `ไม่อนุมัติ${lt}ของ <b>${esc(nameOf(d.staff_id))}</b> — ${what}`,
+        cancelled: d.staff_id === e.actor_staff ? `ยกเลิกการแจ้ง${lt} — ${what}` : `ยกเลิกคำขอ${lt}ของ <b>${esc(nameOf(d.staff_id))}</b> — ${what}` }[n.status] || `แก้ไขการลา — ${what}`;
+    } else text = `แก้ไขการลา — ${what}`;
+    return { actor, text, cat: "การลา" };
+  } else if (e.table_name === "staff") {
+    const who = `<b>${esc(n.nickname || o.nickname)}</b>`;
+    if (e.op === "INSERT") text = `เพิ่มพนักงาน ${who}`;
+    else if (e.op === "DELETE") text = `ลบพนักงาน ${who}`;
+    else {
+      const parts = [];
+      if (ch.includes("nickname")) parts.push(`เปลี่ยนชื่อ <s>${esc(o.nickname)}</s> → ${who}`);
+      if (ch.includes("role")) parts.push(n.role === "admin" ? `ตั้ง ${who} เป็นแอดมิน` : `ถอดสิทธิ์แอดมินของ ${who}`);
+      if (ch.includes("active")) parts.push(n.active ? `เปิดสถานะ ${who}` : `ปิดสถานะ ${who} (เลิกทำงาน)`);
+      if (ch.includes("auth_user_id")) parts.push(n.auth_user_id ? `${who} ผูกบัญชี LINE` : `ยกเลิกการผูก LINE ของ ${who}`);
+      if (ch.includes("bg_color") || ch.includes("fg_color")) parts.push(`เปลี่ยนสีป้ายชื่อ ${who}`);
+      if (!parts.length && (ch.includes("line_display_name") || ch.includes("line_picture_url"))) parts.push(`อัปเดตชื่อ/รูปจาก LINE ของ ${who}`);
+      text = parts.join(", ") || `แก้ไขข้อมูล ${who}`;
+    }
+    return { actor, text, cat: "พนักงาน" };
+  } else {
+    const label = e.table_name === "channels" ? `ช่อง ${esc(n.name || o.name)}` : e.table_name === "shifts" ? `กะ ${esc(n.label || o.label)}` : `ค่า ${esc(n.key || o.key)}`;
+    if (e.op === "INSERT") text = `เพิ่ม${label}`;
+    else if (e.op === "DELETE") text = `ลบ${label}`;
+    else text = `แก้ไข${label}: ` + ch.map(k => `${esc(k)} <s>${esc(String(o[k] ?? "-"))}</s> → ${esc(String(n[k] ?? "-"))}`).join(", ");
+    return { actor, text, cat: "ตั้งค่า" };
+  }
+  return { actor, text, cat: LOG_CAT[e.table_name] || "อื่นๆ" };
+}
+const logTime = iso => new Date(iso).toLocaleString("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+function logRow(e) {
+  const d = describeLog(e);
+  return `<div class="logr"><span class="lt tnum">${logTime(e.at)}${e.count > 1 ? "" : ""}</span><div class="lx"><b class="${e.source === "backend" ? "be" : ""}">${esc(d.actor)}</b> ${d.text}</div><span class="lc">${d.cat}</span></div>`;
+}
+function groupLog(rows) {
+  // collapse bulk slot creation (e.g. "เติมช่องของเดือน") into one line
+  const out = [];
+  for (const e of rows) {
+    const last = out[out.length - 1];
+    if (last && last._bulk && e.table_name === "slots" && e.op === "INSERT" && e.actor_staff === last.actor_staff && Math.abs(Date.parse(last.at) - Date.parse(e.at)) < 15000) { last._n++; last._dates.push(e.new_data.work_date); continue; }
+    if (e.table_name === "slots" && e.op === "INSERT") out.push({ ...e, _bulk: true, _n: 1, _dates: [e.new_data.work_date] }); else out.push(e);
+  }
+  return out;
+}
+function logRowG(e) {
+  if (e._bulk && e._n > 1) {
+    const ds = e._dates.sort(); const actor = e.actor_name || (e.source === "backend" ? "ระบบหลังบ้าน" : "ไม่ทราบ");
+    return `<div class="logr"><span class="lt tnum">${logTime(e.at)}</span><div class="lx"><b class="${e.source === "backend" ? "be" : ""}">${esc(actor)}</b> สร้างช่องใหม่ ${e._n} ช่อง (${shortDate(ds[0])} – ${shortDate(ds[ds.length - 1])})</div><span class="lc">กะ</span></div>`;
+  }
+  return logRow(e);
+}
+function logAbout(e) { const o = e.old_data || {}, n = e.new_data || {}; if (e.table_name === "staff") return [n.id || o.id]; return [o.staff_id, n.staff_id].filter(Boolean); }
+
+function renderLog(body) {
+  const L = (S.log ||= { from: "", to: "", actor: "", about: "", cat: "", rows: null, more: false, loading: false });
+  if (!L.from) { const t = todayStr(); const d = new Date(Date.parse(t + "T00:00:00+07:00") - 6 * 864e5); L.to = t; L.from = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(d); }
+  const actors = [...new Map((L.rows || []).map(e => [e.actor_staff || "_be", e.actor_name || "ระบบหลังบ้าน"])).entries()];
+  const rows = (L.rows || []).filter(e => (!L.cat || describeLog(e).cat === L.cat) && (!L.actor || (e.actor_staff || "_be") === L.actor) && (!L.about || logAbout(e).includes(L.about)));
+  const grouped = groupLog(rows);
+  let lastDay = ""; const listHtml = grouped.map(e => {
+    const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date(e.at));
+    const head = day !== lastDay ? `<div class="logd">${thDate(day)}</div>` : ""; lastDay = day; return head + logRowG(e); }).join("");
+  const inp = 'style="border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px"';
+  body.innerHTML = `<div class="panel"><div class="panel-h"><h3>ประวัติการแก้ไข</h3><span class="sub">ทุกการเปลี่ยนแปลงถูกบันทึกอัตโนมัติ · แก้ไขหรือลบไม่ได้</span></div>
+    <div class="logf">
+      <label class="field">ตั้งแต่<input type="date" id="lgF" value="${L.from}" ${inp}></label>
+      <label class="field">ถึง<input type="date" id="lgT" value="${L.to}" ${inp}></label>
+      <label class="field">ประเภท<select id="lgC"><option value="">ทั้งหมด</option>${["กะ", "การลา", "พนักงาน", "ตั้งค่า"].map(c => `<option ${L.cat === c ? "selected" : ""}>${c}</option>`).join("")}</select></label>
+      <label class="field">คนที่แก้<select id="lgA"><option value="">ทุกคน</option>${actors.map(([id, nm]) => `<option value="${id}" ${L.actor === id ? "selected" : ""}>${esc(nm)}</option>`).join("")}</select></label>
+      <label class="field">เกี่ยวกับพนักงาน<select id="lgP"><option value="">ทุกคน</option>${S.staff.map(st => `<option value="${st.id}" ${L.about === st.id ? "selected" : ""}>${esc(st.nickname)}</option>`).join("")}</select></label>
+    </div>
+    <div style="padding:0 16px 12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri sm" id="lgGo">${L.loading ? "กำลังโหลด…" : "แสดงประวัติ"}</button><button class="btn sm" id="lgX" ${rows.length ? "" : "disabled"}>⬇ Export Excel</button>
+      ${L.rows ? `<span class="note" style="margin:0;align-self:center">${rows.length} รายการ</span>` : ""}</div>
+    <div class="loglist">${L.rows ? (listHtml || `<div class="empty">ไม่มีการแก้ไขในช่วงนี้</div>`) : `<div class="empty">เลือกช่วงวันที่แล้วกด "แสดงประวัติ"</div>`}</div>
+    ${L.more ? `<div style="padding:12px 16px"><button class="btn sm" id="lgMore">โหลดเพิ่ม</button></div>` : ""}</div>`;
+  const load = async more => {
+    L.from = $("#lgF").value; L.to = $("#lgT").value; if (!L.from || !L.to || L.from > L.to) return toast("ช่วงวันที่ไม่ถูกต้อง", "err");
+    L.loading = true; if (!more) render();
+    try {
+      const fromIso = new Date(Date.parse(L.from + "T00:00:00+07:00")).toISOString(); const toIso = new Date(Date.parse(L.to + "T00:00:00+07:00") + 864e5).toISOString();
+      const beforeId = more && L.rows.length ? L.rows[L.rows.length - 1].id : null;
+      const data = await API.loadAudit(fromIso, toIso, beforeId);
+      L.rows = more ? L.rows.concat(data) : data; L.more = data.length >= 400;
+    } catch (e) { toast("โหลดประวัติไม่สำเร็จ: " + e.message, "err"); }
+    L.loading = false; render();
+  };
+  $("#lgGo").onclick = () => load(false);
+  const m = $("#lgMore"); if (m) m.onclick = () => load(true);
+  $("#lgC").onchange = e => { L.cat = e.target.value; render(); };
+  $("#lgA").onchange = e => { L.actor = e.target.value; render(); };
+  $("#lgP").onchange = e => { L.about = e.target.value; render(); };
+  $("#lgX").onclick = async () => {
+    try {
+      await loadXLSX(); const strip = h => { const d = document.createElement("div"); d.innerHTML = h.replace(/<s>/g, "[เดิม: ").replace(/<\/s>/g, "]"); return d.textContent; };
+      const out = rows.map(e => { const d = describeLog(e); return { "เวลา": new Date(e.at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }), "ผู้แก้": d.actor, "ประเภท": d.cat, "รายละเอียด": strip(d.text), "แหล่งที่มา": e.source === "backend" ? "ระบบหลังบ้าน" : "หน้าเว็บ", "รหัสรายการ": e.id }; });
+      const wb = XLSX.utils.book_new(); const ws = XLSX.utils.json_to_sheet(out); ws["!cols"] = [20, 14, 10, 80, 14, 10].map(w => ({ wch: w }));
+      XLSX.utils.book_append_sheet(wb, ws, "ประวัติการแก้ไข"); XLSX.writeFile(wb, `ประวัติการแก้ไข_${L.from}_ถึง_${L.to}.xlsx`); toast(`ดาวน์โหลดแล้ว ${out.length} รายการ`, "ok");
+    } catch (e) { toast(e.message, "err"); }
+  };
+  if (!L.rows && !L.loading) load(false);
+}
+
 /* ===== Leave ===== */
 function leaveLine(s) {
   if (s.status !== "approved") return "";
@@ -1168,10 +1336,21 @@ function adminSlot(s) {
       <option value="assign" ${cur === "assign" ? "selected" : ""}>ลงชื่อพนักงาน (อนุมัติทันที)</option></select></label>
     <label class="field ${cur === "assign" ? "" : "hidden"}" id="asw">พนักงาน<select id="ast"><option value="">— เลือก —</option>${opts}</select></label>
     <div class="btns"><button class="btn" data-close>ปิด</button><button class="btn pri" id="asv">บันทึก</button></div>
-    ${s.staff_id && ["approved", "pending"].includes(s.status) ? `<div style="text-align:center;margin-top:12px"><a href="#" class="lv-link" id="recLeave">บันทึกการลาแทน ${esc(staffById(s.staff_id)?.nickname || "")}</a></div>` : ""}`);
+    <div style="display:flex;justify-content:center;gap:18px;margin-top:12px;flex-wrap:wrap">
+      ${s.staff_id && ["approved", "pending"].includes(s.status) ? `<a href="#" class="lv-link" id="recLeave">บันทึกการลาแทน ${esc(staffById(s.staff_id)?.nickname || "")}</a>` : ""}
+      <a href="#" class="lv-link" id="slotHist">ดูประวัติช่องนี้</a></div>`);
   $("#as").onchange = e => $("#asw").classList.toggle("hidden", e.target.value !== "assign");
   { const pl = pendingLeaveOf(s.id); if (pl) { $("#lap").onclick = () => reviewLeave(pl.id, true); $("#lrj").onclick = () => reviewLeave(pl.id, false); } }
   { const rl = $("#recLeave"); if (rl) rl.onclick = e => { e.preventDefault(); adminRecordLeave(s); }; }
+  $("#slotHist").onclick = async e => {
+    e.preventDefault();
+    try {
+      const rows = await API.slotHistory(s.id);
+      openSheet(`<h3>ประวัติช่องนี้</h3><p class="lead"></p>${ticket(s)}
+        <div class="loglist">${rows.map(logRow).join("") || `<div class="empty">ยังไม่มีการแก้ไขตั้งแต่เริ่มเก็บประวัติ</div>`}</div>
+        <div class="btns" style="margin-top:12px"><button class="btn" data-close>ปิด</button></div>`);
+    } catch (err) { toast(err.message, "err"); }
+  };
   const ap = $("#ap"); if (ap) { ap.onclick = () => review(s.id, true); $("#rj").onclick = () => review(s.id, false); }
   $("#asv").onclick = async () => {
     const v = $("#as").value; const st = $("#ast").value;
