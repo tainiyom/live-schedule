@@ -20,6 +20,7 @@
   --danger:#d9342b; --danger-bg:#fdecea;
   --shadow:0 1px 2px rgba(30,25,15,.06),0 4px 16px rgba(30,25,15,.06);
   --r:12px;
+  --divider:#c9c2b5;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#141412; --surface:#1d1c1a; --surface-2:#232220; --ink:#f1efe9; --ink-2:#b9b4aa; --ink-3:#8a857c;
@@ -27,6 +28,7 @@
   --open:#4fd18a; --open-bg:#143222; --open-line:#2d6b47; --full:#9aa1ab; --full-bg:#26282b;
   --pending:#f3b45a; --pending-bg:#3a2a12; --pending-line:#7a5520; --danger:#ff6b61; --danger-bg:#3a1916;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  --divider:#4a4740;
 }}
 :root[data-theme="dark"]{
   --bg:#141412; --surface:#1d1c1a; --surface-2:#232220; --ink:#f1efe9; --ink-2:#b9b4aa; --ink-3:#8a857c;
@@ -34,6 +36,7 @@
   --open:#4fd18a; --open-bg:#143222; --open-line:#2d6b47; --full:#9aa1ab; --full-bg:#26282b;
   --pending:#f3b45a; --pending-bg:#3a2a12; --pending-line:#7a5520; --danger:#ff6b61; --danger-bg:#3a1916;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  --divider:#4a4740;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -146,11 +149,11 @@ table.g th,table.g td{padding:4px 5px;border-bottom:1px solid var(--line);white-
 table.g thead th{position:sticky;background:var(--surface);z-index:2}
 table.g thead tr.r1 th{top:0;height:34px;font-size:13.5px}
 table.g thead tr.r2 th{top:34px;font-weight:600;font-size:12px;color:var(--ink-2);background:var(--surface-2)}
-table.g th.ch{color:#1d1b18;border-left:3px solid var(--surface)}
-table.g td.first,table.g th.first{position:sticky;left:0;background:var(--surface);z-index:3;text-align:left;padding-left:10px;border-right:1px solid var(--line)}
+table.g th.ch{color:#1d1b18;border-left:3px solid var(--divider)}
+table.g td.first,table.g th.first{position:sticky;left:0;background:var(--surface);z-index:3;text-align:left;padding-left:10px;border-right:1px solid var(--line);box-shadow:4px 0 6px -4px rgba(0,0,0,.18)}
 table.g thead th.first{z-index:4}
-table.g td.cl{border-left:3px solid var(--surface)}
-table.g tr.past td{opacity:.5}
+table.g td.cl,table.g thead tr.r2 th.cl{border-left:3px solid var(--divider)}
+table.g tr.past td>*{opacity:.45}
 table.g tr.today td.first{box-shadow:inset 3px 0 0 var(--ink)}
 table.g .pill{min-width:84px;height:26px;font-size:12.5px;padding:0 9px}
 .dlab{display:flex;align-items:center;gap:8px;font-weight:600}
