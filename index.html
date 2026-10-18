@@ -223,6 +223,24 @@ table.g .pill{min-width:84px;height:26px;font-size:12.5px;padding:0 9px}
 @media (min-width:641px){.plist{display:none}}
 
 @media (max-width:640px){.li{flex-wrap:wrap}.li .row-actions{width:100%;padding-left:74px;justify-content:flex-start}.li .row-actions .btn{flex:1}}
+/* live now */
+.livebox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin:6px 0 12px;overflow:hidden}
+.livebox.empty-live{display:flex;gap:10px;align-items:center;padding:12px 16px;color:var(--ink-3);font-size:14px;box-shadow:none}
+.live-h{display:flex;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.live-h b{font-size:15px}.live-h .sub{color:var(--ink-3);font-size:12.5px;margin-left:auto}
+.ldot{width:9px;height:9px;border-radius:50%;background:#e5484d;box-shadow:0 0 0 0 rgba(229,72,77,.6);animation:lpulse 1.6s infinite;flex:0 0 auto}
+.ldot.off{background:var(--ink-3);animation:none}
+@keyframes lpulse{0%{box-shadow:0 0 0 0 rgba(229,72,77,.55)}70%{box-shadow:0 0 0 7px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+.live-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.live-r{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.live-r .sw{width:6px;align-self:stretch;border-radius:3px;flex:0 0 auto}
+.live-c{flex:1;min-width:0}
+.live-ch{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-t{font-size:12px;color:var(--ink-3);white-space:nowrap}
+.live-who{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.live-next{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.live-next b{color:var(--ink-2);font-weight:600}
+.nonext{color:var(--danger);font-weight:600}
 /* audit log */
 .logf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0 12px;padding:14px 16px 0}
 .logf select{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px;font-size:14px}
@@ -343,7 +361,7 @@ function toast(msg, type = "") {
 
 /* ===== State ===== */
 const S = {
-  me: null, user: null, channels: [], shifts: [], staff: [], slots: new Map(), leaves: new Map(),
+  me: null, user: null, channels: [], shifts: [], staff: [], slots: new Map(), leaves: new Map(), nowSlots: new Map(),
   y: 0, m: 0, sel: null, tab: "overview", view: matchMedia("(min-width:900px)").matches ? "grid" : "day",
   onlyOpen: false, sumRange: "all", live: false, flash: new Set()
 };
@@ -593,6 +611,12 @@ async function startApp() {
   await loadMonth();
   API.subscribe(onRealtime, on => { S.live = on; const l = $("#live"); if (l) { l.classList.toggle("on", on); l.lastChild.textContent = on ? "อัปเดตสด" : "กำลังเชื่อมต่อ…"; } });
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") loadMonth(true); });
+  setInterval(async () => { if (S._nowDay !== todayStr()) { S._nowDay = todayStr(); await loadNowWindow(); } const lp = $("#livePanel"); if (lp) lp.innerHTML = livePanelHtml(); }, 60000);
+}
+
+function bkkShift(days) { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date(Date.parse(todayStr() + "T12:00:00+07:00") + days * 864e5)); }
+async function loadNowWindow() {
+  try { const rows = await API.loadRange(bkkShift(-1), bkkShift(1)); S.nowSlots = new Map(rows.map(r => [r.id, r])); } catch (e) {}
 }
 
 async function loadMonth(silent) {
@@ -600,6 +624,7 @@ async function loadMonth(silent) {
     const [rows, lv] = await Promise.all([API.loadMonth(S.y, S.m), API.loadLeaves(ymd(S.y, S.m, 1), ymd(S.y, S.m, daysIn(S.y, S.m))).catch(() => [])]);
     S.slots = new Map(rows.map(r => [r.id, r]));
     S.leaves = new Map(lv.map(r => [r.id, r]));
+    await loadNowWindow();
     render();
   } catch (e) { if (!silent) toast("โหลดข้อมูลไม่สำเร็จ: " + e.message, "err"); }
 }
@@ -624,6 +649,7 @@ function onRealtime(table, p) {
   const r = p.new; const prev = S.slots.get(r.id);
   const inMonth = r.work_date.startsWith(`${S.y}-${pad(S.m)}-`);
   if (inMonth) { S.slots.set(r.id, r); S.flash.add(r.id); }
+  if (r.work_date >= bkkShift(-1) && r.work_date <= bkkShift(1)) { if (r.staff_id) S.nowSlots.set(r.id, r); else S.nowSlots.delete(r.id); }
   if (prev && S.me && prev.staff_id === S.me.id && prev.status === "pending") {
     const label = slotLabel(r);
     if (r.status === "approved") toast(`✓ อนุมัติแล้ว: ${label}`, "ok");
@@ -771,11 +797,40 @@ function stats() {
   return { open, pend, mine, minePend, openToday };
 }
 
+/* ===== Live now ===== */
+function slotWindow(s) { const sh = shiftById(s.shift_id); const r = rangeOf(sh.label); const st = Date.parse(`${s.work_date}T00:00:00+07:00`) + r[0] * 60000; return [st, st + (r[1] - r[0]) * 60000]; }
+const fmtLeft = ms => { const m = Math.max(0, Math.round(ms / 60000)); const h = Math.floor(m / 60); return h ? `${h} ชม.${m % 60 ? ` ${m % 60} นาที` : ""}` : `${m} นาที`; };
+function livePanelHtml() {
+  const now = Date.now();
+  const pool = new Map([...S.nowSlots, ...[...S.slots].filter(([, s]) => s.staff_id)]);
+  const approved = [...pool.values()].filter(s => s.status === "approved" && s.staff_id && shiftById(s.shift_id));
+  const chans = [...S.channels].sort((a, b) => a.sort_order - b.sort_order);
+  const rows = [];
+  for (const c of chans) {
+    const inCh = approved.filter(s => shiftById(s.shift_id).channel_id === c.id).map(s => ({ s, w: slotWindow(s) }));
+    const live = inCh.filter(x => x.w[0] <= now && now < x.w[1]).sort((a, b) => a.w[0] - b.w[0]);
+    for (const x of live) {
+      const nxt = inCh.filter(y => y.w[0] === x.w[1]).sort((a, b) => a.w[1] - b.w[1])[0];
+      rows.push({ c, x, nxt });
+    }
+  }
+  const pillFor = id => { const st = staffById(id) || { nickname: "?", bg_color: "#999", fg_color: "#fff" }; return `<span class="pill p-name" style="min-width:0;background:${st.bg_color};color:${st.fg_color}">${esc(st.nickname)}</span>`; };
+  if (!rows.length) return `<div class="livebox empty-live"><span class="ldot off"></span><span>ตอนนี้ยังไม่มีช่องที่กำลังไลฟ์</span></div>`;
+  return `<div class="livebox"><div class="live-h"><span class="ldot"></span><b>กำลังไลฟ์ตอนนี้</b><span class="sub">${new Date(now).toLocaleTimeString("th-TH", { timeZone: "Asia/Bangkok", hour: "2-digit", minute: "2-digit" })} น.</span></div>
+    <div class="live-list">${rows.map(({ c, x, nxt }) => {
+      const sh = shiftById(x.s.shift_id);
+      return `<div class="live-r"><span class="sw" style="background:${c.color}"></span>
+        <div class="live-c"><div class="live-ch">${esc(c.name)}</div><div class="live-t tnum">${sh.label}</div><div class="live-t">เหลือ ${fmtLeft(x.w[1] - now)}</div></div>
+        <div class="live-who">${pillFor(x.s.staff_id)}
+          <div class="live-next">${nxt ? `ต่อด้วย <b>${esc(staffById(nxt.s.staff_id)?.nickname || "?")}</b> ${shiftById(nxt.s.shift_id).label}` : `<span class="nonext">ไม่มีกะต่อ</span>`}</div></div></div>`; }).join("")}</div></div>`;
+}
+
 function renderOverview(body) {
   const st = stats();
   const nextMine = [...S.slots.values()].filter(s => s.staff_id === S.me.id && s.work_date >= todayStr()).sort((a, b) => a.work_date.localeCompare(b.work_date))[0];
   const chans = [...S.channels].sort((a, b) => a.sort_order - b.sort_order);
   body.innerHTML = `
+    <div id="livePanel">${livePanelHtml()}</div>
     <div class="stats">
       <div class="stat open"><div class="k">ช่องว่างที่ยังจองได้</div><div class="v tnum">${st.open}</div><div class="s">วันนี้ ${st.openToday} ช่อง</div></div>
       <div class="stat pend"><div class="k">รออนุมัติ (ทั้งทีม)</div><div class="v tnum">${st.pend}</div><div class="s">คำขอที่ยังไม่ยืนยัน</div></div>
