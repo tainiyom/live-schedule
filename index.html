@@ -329,66 +329,64 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}
 @keyframes spin{to{transform:rotate(360deg)}}
 main{padding-bottom:60px}
 
-/* payroll */
+/* payroll report */
 .sheet.wide{max-width:600px}
-.payact{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 4px}
-.paywarn{margin:10px 16px 0;padding:10px 12px;border-radius:10px;background:var(--pending-bg);border:1px solid var(--pending-line);color:var(--ink-2);font-size:13px}
-.paywarn b{color:var(--pending)}
-.payrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:11px 16px;flex-wrap:wrap}
-.payrow:first-of-type{border-top:0}
-.payrow:hover{background:var(--surface-2)}
-.pr-l{display:flex;align-items:center;gap:6px;flex:0 0 auto;min-width:150px}
-.pr-m{flex:1 1 220px;min-width:0;display:flex;flex-wrap:wrap;gap:4px}
-.pr-r{flex:0 0 auto;margin-left:auto;text-align:right;display:flex;flex-direction:column;line-height:1.25}
-.pr-r b{font-size:18px;letter-spacing:-.01em}
-.pr-r small{font-size:12px;color:var(--ink-3)}
+.paywarn{margin:10px 16px 14px;padding:10px 12px;border-radius:10px;background:var(--pending-bg);border:1px solid var(--pending-line);color:var(--ink-2);font-size:13px}
 .plus{color:var(--open)}.minus{color:var(--danger)}
-.pchip{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
-.pchip b{color:var(--ink)}
-.pchip.pend{background:var(--pending-bg);border-color:var(--pending-line);color:var(--pending)}
-.ptype{font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-3)}
+.ptype{font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-3);white-space:nowrap}
 .ptype.t-REG{color:var(--open);border-color:var(--open-line);background:var(--open-bg)}
 .ptype.t-VIP{color:#8a5a00;border-color:#e8c46a;background:#fff6db}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ptype.t-VIP{color:#f3c75a;border-color:#6b5520;background:#2e2610}}
 :root[data-theme="dark"] .ptype.t-VIP{color:#f3c75a;border-color:#6b5520;background:#2e2610}
-.sdot{min-width:18px;height:18px;border-radius:99px;background:var(--pending);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center;padding:0 5px}
-.paytot{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:2px solid var(--line-2);font-weight:600}
-.paytot b{font-size:19px}
-.paysheet .ps-h{display:flex;gap:10px;align-items:center}
-.paysheet .ps-h small{color:var(--ink-3);font-size:12.5px}
+.prtool{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 0;align-items:center}
+.prtool select{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:7px 10px;font-size:14.5px;font-weight:600;min-width:0;max-width:100%}
+.pstats em{display:block;font-style:normal;font-size:12px;margin-top:2px}.pstats em.up{color:var(--open)}.pstats em.down{color:var(--danger)}
+.pstats b .plus,.pstats b .minus{font-size:16px}
+.prchart{padding:14px 16px 16px}
+.prch-h{font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:8px}.prch-h small{font-weight:400;color:var(--ink-3);margin-left:6px}
+.prbars{display:flex;align-items:stretch;gap:6px;height:150px;overflow-x:auto;padding-bottom:2px}
+.prbar{flex:1 0 34px;max-width:72px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;border:0;background:none;padding:0;min-width:34px}
+.prbar .b{width:70%;max-width:34px;background:color-mix(in srgb,var(--ink) 18%,transparent);border-radius:5px 5px 2px 2px;transition:background .15s}
+.prbar:hover .b{background:color-mix(in srgb,var(--ink) 35%,transparent)}
+.prbar.on .b{background:var(--accent)}
+.prbar .v{font-size:10.5px;color:var(--ink-3)}.prbar.on .v{color:var(--ink);font-weight:700}
+.prbar .l{font-size:11px;color:var(--ink-3);white-space:nowrap}.prbar.on .l{color:var(--ink);font-weight:600}
+.prtbl{display:flex;flex-direction:column}
+.prtr{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(3,minmax(0,1fr)) minmax(0,1.1fr);gap:10px;align-items:center;padding:10px 16px;border:0;border-top:1px solid var(--line);background:none;text-align:right;width:100%;font-size:14px}
+.prtr > span:first-child{text-align:left}
+button.prtr:hover{background:var(--surface-2)}
+.prth{font-size:12px;color:var(--ink-3);border-top:0;padding-top:8px;padding-bottom:8px;background:var(--surface-2)}
+.prtr .net{font-weight:700;font-size:15px}
+.prtot{border-top:2px solid var(--line-2);font-weight:600}
+.prn{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.prshare{display:block;flex-basis:100%;height:4px;border-radius:3px;background:var(--surface-2);overflow:hidden;font-style:normal;max-width:180px}
+.prshare i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.prshare.wide{max-width:none;grid-column:1/-1}
+.prgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
+.prgrid .panel + .panel{margin-top:0}
+.prline{display:grid;grid-template-columns:1fr auto auto;gap:4px 12px;align-items:center;padding:9px 16px;border-top:1px solid var(--line);font-size:14px}
+.prline:first-of-type{border-top:0}.prline small{color:var(--ink-3);font-size:12px}
+.paysheet .ps-h{display:flex;gap:10px;align-items:center}.paysheet .ps-h small{color:var(--ink-3);font-size:12.5px}
 .ps-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .ps-sum div{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 8px;min-width:0}
-.ps-sum span{display:block;font-size:11.5px;color:var(--ink-3)}
-.ps-sum b{font-size:15px}
+.ps-sum span{display:block;font-size:11.5px;color:var(--ink-3)}.ps-sum b{font-size:15px}
 .ps-sum .net{background:var(--ink);border-color:var(--ink)}.ps-sum .net span,.ps-sum .net b{color:var(--bg)}
-.ps-sec{margin-top:14px}
-.ps-sec h4{margin:0 0 6px;font-size:14px}
-.sug{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 10px;border:1px dashed var(--pending-line);background:var(--pending-bg);border-radius:10px;margin-bottom:6px}
-.sug small{display:block;color:var(--ink-3);font-size:12px}
+.ps-sec{margin-top:16px}.ps-sec h4{margin:0 0 6px;font-size:14px}
 .itm{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
-.itm > span:first-child{width:72px;font-weight:700;flex:0 0 auto}
 .itm-t{flex:1;min-width:0}.itm-t small{display:block;color:var(--ink-3);font-size:12px}
-.icon-x{border:0;background:none;color:var(--ink-3);font-size:15px;padding:4px 6px;border-radius:6px}.icon-x:hover{color:var(--danger);background:var(--danger-bg)}
-.addit{display:flex;flex-direction:column;gap:8px;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
-.addit select,.addit input{border:1px solid var(--line-2);background:var(--surface);border-radius:9px;padding:8px 10px;font-size:15px;width:100%;min-width:0}
-.addit-r{display:flex;gap:8px}.addit-r label{flex:1;display:flex;flex-direction:column;font-size:12px;color:var(--ink-3);gap:3px;min-width:0}
-.pe{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:flex-start}
-.pe.off{opacity:.55}.pe.off .pe-a{text-decoration:line-through}
-.pe-d{width:44px;flex:0 0 auto;font-size:12.5px}.pe-d b{font-size:15px}
-.pe-w{flex:1;min-width:0}.pe-w small{color:var(--ink-3);font-size:12px}
-.pe-a{flex:0 0 auto;font-weight:600}
-.pe-o{display:flex;gap:12px;flex-wrap:wrap;margin-top:3px;font-size:12.5px;color:var(--ink-2)}
-.pe-o label{display:inline-flex;gap:5px;align-items:center;cursor:pointer}.pe-o input{accent-color:var(--accent);margin:0}
-.mtag{font-size:11px;padding:1px 6px;border-radius:5px;background:var(--accent-soft);color:var(--open);font-weight:600}
-.rtab{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
-.rtab table{border-collapse:collapse;width:100%;font-size:13.5px}
-.rtab th,.rtab td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
-.rtab th{background:var(--surface-2);font-weight:600;font-size:12.5px}
-.rtab input{width:76px;border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:5px 7px;text-align:right}
-.rt-h{margin:14px 0 6px;font-size:14px}
-.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0 10px}
-.rgrid input,.field input[type=number]{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px;font-size:15px}
-@media (max-width:560px){.pr-l{min-width:0}.pr-m{order:3;flex-basis:100%}.ps-sum{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){
+  .prth{display:none}
+  .prtr{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 10px}
+  .prtr > span:first-child{grid-column:1/-1}
+  .prtr > span[data-l]{text-align:left;font-size:13px}
+  .prtr > span[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--ink-3);font-weight:400}
+  .prtr > span.net{grid-column:1/-1;text-align:right;font-size:17px;margin-top:-2px;padding-top:4px;border-top:1px dashed var(--line)}
+  .prtr > span.net::before{display:none}
+  .prtot > span:empty{display:none}
+  .ps-sum{grid-template-columns:repeat(2,1fr)}
+  .pstats.prs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pstats.prs b{font-size:19px}
+}
 </style>
 </head>
 <body>
@@ -399,7 +397,7 @@ main{padding-bottom:60px}
 /* ===== Config ===== */
 const SUPABASE_URL = "https://gexapkcuvultnrxiyvgd.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdleGFwa2N1dnVsdG5yeGl5dmdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MDQ1MzIsImV4cCI6MjEwNzQ4MDUzMn0.SQZfZ3NadKjUdo3GBoAxIjgBeA8KVwEALYNyn7oCAnA";
-const APP_VERSION = "2026.11.06-2";
+const APP_VERSION = "2026.11.06-3";
 const DEMO = new URLSearchParams(location.search).has("demo");
 const DEMO_DATA = {"staff":[{"id":"s0","nickname":"แก้ม","bg_color":"#d94fb5","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s1","nickname":"ต้อยติ่ง","bg_color":"#e6d3f2","fg_color":"#6a3d9a","role":"staff","active":true,"auth_user_id":null},{"id":"s2","nickname":"Pukkyy","bg_color":"#f8cfb4","fg_color":"#8a4b2a","role":"staff","active":true,"auth_user_id":null},{"id":"s3","nickname":"กะแต","bg_color":"#2453a6","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s4","nickname":"ลูกตาล","bg_color":"#6b1ff0","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s5","nickname":"พีม","bg_color":"#cfe3f5","fg_color":"#1f4e79","role":"staff","active":true,"auth_user_id":null},{"id":"s6","nickname":"DEAR","bg_color":"#f0b3e2","fg_color":"#5a1f4f","role":"staff","active":true,"auth_user_id":null},{"id":"s7","nickname":"แบม","bg_color":"#6b3a14","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s8","nickname":"RISA","bg_color":"#3a3a3a","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s9","nickname":"JASMIN","bg_color":"#4b2f80","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s10","nickname":"เก๊กฮวย","bg_color":"#fbe3a6","fg_color":"#7a5a00","role":"staff","active":true,"auth_user_id":null},{"id":"s11","nickname":"จั๊กจั่น","bg_color":"#7cf26a","fg_color":"#1b5e20","role":"staff","active":true,"auth_user_id":null},{"id":"s12","nickname":"NIGHT","bg_color":"#5fb3a3","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s13","nickname":"น้ำหวาน","bg_color":"#e83cc0","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null},{"id":"s14","nickname":"อุ๋งอิ๋ง","bg_color":"#f1d8f1","fg_color":"#8e24aa","role":"staff","active":true,"auth_user_id":null},{"id":"s15","nickname":"มิน","bg_color":"#9c1f7a","fg_color":"#ffffff","role":"staff","active":true,"auth_user_id":null}],"channels":[{"id":1,"code":"support","name":"ซัพพอตทีมไลฟ์","subtitle":null,"color":"#f7e94a","sort_order":0,"priority":null},{"id":2,"code":"kcm","name":"KCM","subtitle":"ช่องหลัก","color":"#f39b3a","sort_order":1,"priority":1},{"id":3,"code":"tinn","name":"TINN Care","subtitle":"ช่อง 2","color":"#f3c6f0","sort_order":2,"priority":2},{"id":4,"code":"naga","name":"NAGA Care","subtitle":"ช่อง 3","color":"#d4ebcf","sort_order":3,"priority":3},{"id":5,"code":"warawut","name":"Warawut","subtitle":"ช่อง 4","color":"#fcf1c4","sort_order":4,"priority":4}],"shifts":[{"id":1,"channel_id":1,"label":"08.00-17.00","sort_order":0},{"id":2,"channel_id":1,"label":"23.00-08.00","sort_order":1},{"id":3,"channel_id":2,"label":"05.00-08.00","sort_order":0},{"id":4,"channel_id":2,"label":"05.00-17.00","sort_order":1},{"id":5,"channel_id":2,"label":"08.00-17.00","sort_order":2},{"id":6,"channel_id":2,"label":"17.00-05.00","sort_order":3},{"id":7,"channel_id":3,"label":"05.00-08.00","sort_order":0},{"id":8,"channel_id":3,"label":"05.00-17.00","sort_order":1},{"id":9,"channel_id":3,"label":"08.00-17.00","sort_order":2},{"id":10,"channel_id":3,"label":"17.00-05.00","sort_order":3},{"id":11,"channel_id":4,"label":"05.00-08.00","sort_order":0},{"id":12,"channel_id":4,"label":"05.00-17.00","sort_order":1},{"id":13,"channel_id":4,"label":"08.00-17.00","sort_order":2},{"id":14,"channel_id":4,"label":"17.00-05.00","sort_order":3},{"id":15,"channel_id":5,"label":"05.00-08.00","sort_order":0},{"id":16,"channel_id":5,"label":"05.00-17.00","sort_order":1},{"id":17,"channel_id":5,"label":"08.00-17.00","sort_order":2},{"id":18,"channel_id":5,"label":"17.00-05.00","sort_order":3}],"slots":[{"id":1,"work_date":"2026-10-12","shift_id":1,"status":"closed","staff_id":null},{"id":2,"work_date":"2026-10-12","shift_id":2,"status":"open","staff_id":null},{"id":3,"work_date":"2026-10-13","shift_id":1,"status":"closed","staff_id":null},{"id":4,"work_date":"2026-10-13","shift_id":2,"status":"open","staff_id":null},{"id":5,"work_date":"2026-10-14","shift_id":1,"status":"closed","staff_id":null},{"id":6,"work_date":"2026-10-14","shift_id":2,"status":"open","staff_id":null},{"id":7,"work_date":"2026-10-15","shift_id":1,"status":"closed","staff_id":null},{"id":8,"work_date":"2026-10-15","shift_id":2,"status":"open","staff_id":null},{"id":9,"work_date":"2026-10-16","shift_id":1,"status":"closed","staff_id":null},{"id":10,"work_date":"2026-10-16","shift_id":2,"status":"open","staff_id":null},{"id":11,"work_date":"2026-10-17","shift_id":1,"status":"closed","staff_id":null},{"id":12,"work_date":"2026-10-17","shift_id":2,"status":"open","staff_id":null},{"id":13,"work_date":"2026-10-18","shift_id":1,"status":"open","staff_id":null},{"id":14,"work_date":"2026-10-18","shift_id":2,"status":"approved","staff_id":"s0"},{"id":15,"work_date":"2026-10-19","shift_id":1,"status":"closed","staff_id":null},{"id":16,"work_date":"2026-10-19","shift_id":2,"status":"open","staff_id":null},{"id":17,"work_date":"2026-10-20","shift_id":1,"status":"closed","staff_id":null},{"id":18,"work_date":"2026-10-20","shift_id":2,"status":"open","staff_id":null},{"id":19,"work_date":"2026-10-21","shift_id":1,"status":"closed","staff_id":null},{"id":20,"work_date":"2026-10-21","shift_id":2,"status":"open","staff_id":null},{"id":21,"work_date":"2026-10-22","shift_id":1,"status":"closed","staff_id":null},{"id":22,"work_date":"2026-10-22","shift_id":2,"status":"open","staff_id":null},{"id":23,"work_date":"2026-10-23","shift_id":1,"status":"closed","staff_id":null},{"id":24,"work_date":"2026-10-23","shift_id":2,"status":"open","staff_id":null},{"id":25,"work_date":"2026-10-24","shift_id":1,"status":"closed","staff_id":null},{"id":26,"work_date":"2026-10-24","shift_id":2,"status":"open","staff_id":null},{"id":27,"work_date":"2026-10-25","shift_id":1,"status":"open","staff_id":null},{"id":28,"work_date":"2026-10-25","shift_id":2,"status":"approved","staff_id":"s0"},{"id":29,"work_date":"2026-10-26","shift_id":1,"status":"closed","staff_id":null},{"id":30,"work_date":"2026-10-26","shift_id":2,"status":"open","staff_id":null},{"id":31,"work_date":"2026-10-27","shift_id":1,"status":"closed","staff_id":null},{"id":32,"work_date":"2026-10-27","shift_id":2,"status":"open","staff_id":null},{"id":33,"work_date":"2026-10-28","shift_id":1,"status":"closed","staff_id":null},{"id":34,"work_date":"2026-10-28","shift_id":2,"status":"open","staff_id":null},{"id":35,"work_date":"2026-10-29","shift_id":1,"status":"closed","staff_id":null},{"id":36,"work_date":"2026-10-29","shift_id":2,"status":"open","staff_id":null},{"id":37,"work_date":"2026-10-30","shift_id":1,"status":"closed","staff_id":null},{"id":38,"work_date":"2026-10-30","shift_id":2,"status":"open","staff_id":null},{"id":39,"work_date":"2026-10-31","shift_id":1,"status":"closed","staff_id":null},{"id":40,"work_date":"2026-10-31","shift_id":2,"status":"open","staff_id":null},{"id":41,"work_date":"2026-10-12","shift_id":3,"status":"full","staff_id":null},{"id":42,"work_date":"2026-10-12","shift_id":4,"status":"approved","staff_id":"s1"},{"id":43,"work_date":"2026-10-12","shift_id":5,"status":"full","staff_id":null},{"id":44,"work_date":"2026-10-12","shift_id":6,"status":"approved","staff_id":"s0"},{"id":45,"work_date":"2026-10-13","shift_id":3,"status":"full","staff_id":null},{"id":46,"work_date":"2026-10-13","shift_id":4,"status":"approved","staff_id":"s1"},{"id":47,"work_date":"2026-10-13","shift_id":5,"status":"full","staff_id":null},{"id":48,"work_date":"2026-10-13","shift_id":6,"status":"approved","staff_id":"s0"},{"id":49,"work_date":"2026-10-14","shift_id":3,"status":"full","staff_id":null},{"id":50,"work_date":"2026-10-14","shift_id":4,"status":"approved","staff_id":"s1"},{"id":51,"work_date":"2026-10-14","shift_id":5,"status":"full","staff_id":null},{"id":52,"work_date":"2026-10-14","shift_id":6,"status":"approved","staff_id":"s0"},{"id":53,"work_date":"2026-10-15","shift_id":3,"status":"full","staff_id":null},{"id":54,"work_date":"2026-10-15","shift_id":4,"status":"approved","staff_id":"s1"},{"id":55,"work_date":"2026-10-15","shift_id":5,"status":"full","staff_id":null},{"id":56,"work_date":"2026-10-15","shift_id":6,"status":"approved","staff_id":"s0"},{"id":57,"work_date":"2026-10-16","shift_id":3,"status":"full","staff_id":null},{"id":58,"work_date":"2026-10-16","shift_id":4,"status":"approved","staff_id":"s1"},{"id":59,"work_date":"2026-10-16","shift_id":5,"status":"full","staff_id":null},{"id":60,"work_date":"2026-10-16","shift_id":6,"status":"approved","staff_id":"s0"},{"id":61,"work_date":"2026-10-17","shift_id":3,"status":"approved","staff_id":"s12"},{"id":62,"work_date":"2026-10-17","shift_id":4,"status":"full","staff_id":null},{"id":63,"work_date":"2026-10-17","shift_id":5,"status":"approved","staff_id":"s1"},{"id":64,"work_date":"2026-10-17","shift_id":6,"status":"approved","staff_id":"s2"},{"id":65,"work_date":"2026-10-18","shift_id":3,"status":"approved","staff_id":"s4"},{"id":66,"work_date":"2026-10-18","shift_id":4,"status":"full","staff_id":null},{"id":67,"work_date":"2026-10-18","shift_id":5,"status":"approved","staff_id":"s10"},{"id":68,"work_date":"2026-10-18","shift_id":6,"status":"approved","staff_id":"s2"},{"id":69,"work_date":"2026-10-19","shift_id":3,"status":"full","staff_id":null},{"id":70,"work_date":"2026-10-19","shift_id":4,"status":"approved","staff_id":"s1"},{"id":71,"work_date":"2026-10-19","shift_id":5,"status":"full","staff_id":null},{"id":72,"work_date":"2026-10-19","shift_id":6,"status":"approved","staff_id":"s0"},{"id":73,"work_date":"2026-10-20","shift_id":3,"status":"full","staff_id":null},{"id":74,"work_date":"2026-10-20","shift_id":4,"status":"approved","staff_id":"s1"},{"id":75,"work_date":"2026-10-20","shift_id":5,"status":"full","staff_id":null},{"id":76,"work_date":"2026-10-20","shift_id":6,"status":"approved","staff_id":"s0"},{"id":77,"work_date":"2026-10-21","shift_id":3,"status":"full","staff_id":null},{"id":78,"work_date":"2026-10-21","shift_id":4,"status":"approved","staff_id":"s1"},{"id":79,"work_date":"2026-10-21","shift_id":5,"status":"full","staff_id":null},{"id":80,"work_date":"2026-10-21","shift_id":6,"status":"approved","staff_id":"s0"},{"id":81,"work_date":"2026-10-22","shift_id":3,"status":"full","staff_id":null},{"id":82,"work_date":"2026-10-22","shift_id":4,"status":"approved","staff_id":"s1"},{"id":83,"work_date":"2026-10-22","shift_id":5,"status":"full","staff_id":null},{"id":84,"work_date":"2026-10-22","shift_id":6,"status":"approved","staff_id":"s0"},{"id":85,"work_date":"2026-10-23","shift_id":3,"status":"full","staff_id":null},{"id":86,"work_date":"2026-10-23","shift_id":4,"status":"approved","staff_id":"s1"},{"id":87,"work_date":"2026-10-23","shift_id":5,"status":"full","staff_id":null},{"id":88,"work_date":"2026-10-23","shift_id":6,"status":"approved","staff_id":"s0"},{"id":89,"work_date":"2026-10-24","shift_id":3,"status":"open","staff_id":null},{"id":90,"work_date":"2026-10-24","shift_id":4,"status":"full","staff_id":null},{"id":91,"work_date":"2026-10-24","shift_id":5,"status":"approved","staff_id":"s1"},{"id":92,"work_date":"2026-10-24","shift_id":6,"status":"approved","staff_id":"s2"},{"id":93,"work_date":"2026-10-25","shift_id":3,"status":"approved","staff_id":"s5"},{"id":94,"work_date":"2026-10-25","shift_id":4,"status":"full","staff_id":null},{"id":95,"work_date":"2026-10-25","shift_id":5,"status":"approved","staff_id":"s9"},{"id":96,"work_date":"2026-10-25","shift_id":6,"status":"open","staff_id":null},{"id":97,"work_date":"2026-10-26","shift_id":3,"status":"full","staff_id":null},{"id":98,"work_date":"2026-10-26","shift_id":4,"status":"approved","staff_id":"s1"},{"id":99,"work_date":"2026-10-26","shift_id":5,"status":"full","staff_id":null},{"id":100,"work_date":"2026-10-26","shift_id":6,"status":"approved","staff_id":"s0"},{"id":101,"work_date":"2026-10-27","shift_id":3,"status":"full","staff_id":null},{"id":102,"work_date":"2026-10-27","shift_id":4,"status":"approved","staff_id":"s1"},{"id":103,"work_date":"2026-10-27","shift_id":5,"status":"full","staff_id":null},{"id":104,"work_date":"2026-10-27","shift_id":6,"status":"approved","staff_id":"s0"},{"id":105,"work_date":"2026-10-28","shift_id":3,"status":"full","staff_id":null},{"id":106,"work_date":"2026-10-28","shift_id":4,"status":"approved","staff_id":"s1"},{"id":107,"work_date":"2026-10-28","shift_id":5,"status":"full","staff_id":null},{"id":108,"work_date":"2026-10-28","shift_id":6,"status":"approved","staff_id":"s0"},{"id":109,"work_date":"2026-10-29","shift_id":3,"status":"full","staff_id":null},{"id":110,"work_date":"2026-10-29","shift_id":4,"status":"approved","staff_id":"s1"},{"id":111,"work_date":"2026-10-29","shift_id":5,"status":"full","staff_id":null},{"id":112,"work_date":"2026-10-29","shift_id":6,"status":"approved","staff_id":"s0"},{"id":113,"work_date":"2026-10-30","shift_id":3,"status":"full","staff_id":null},{"id":114,"work_date":"2026-10-30","shift_id":4,"status":"approved","staff_id":"s1"},{"id":115,"work_date":"2026-10-30","shift_id":5,"status":"full","staff_id":null},{"id":116,"work_date":"2026-10-30","shift_id":6,"status":"approved","staff_id":"s0"},{"id":117,"work_date":"2026-10-31","shift_id":3,"status":"approved","staff_id":"s4"},{"id":118,"work_date":"2026-10-31","shift_id":4,"status":"full","staff_id":null},{"id":119,"work_date":"2026-10-31","shift_id":5,"status":"approved","staff_id":"s1"},{"id":120,"work_date":"2026-10-31","shift_id":6,"status":"approved","staff_id":"s3"},{"id":121,"work_date":"2026-10-12","shift_id":7,"status":"full","staff_id":null},{"id":122,"work_date":"2026-10-12","shift_id":8,"status":"approved","staff_id":"s10"},{"id":123,"work_date":"2026-10-12","shift_id":9,"status":"full","staff_id":null},{"id":124,"work_date":"2026-10-12","shift_id":10,"status":"approved","staff_id":"s3"},{"id":125,"work_date":"2026-10-13","shift_id":7,"status":"full","staff_id":null},{"id":126,"work_date":"2026-10-13","shift_id":8,"status":"approved","staff_id":"s10"},{"id":127,"work_date":"2026-10-13","shift_id":9,"status":"full","staff_id":null},{"id":128,"work_date":"2026-10-13","shift_id":10,"status":"approved","staff_id":"s2"},{"id":129,"work_date":"2026-10-14","shift_id":7,"status":"approved","staff_id":"s10"},{"id":130,"work_date":"2026-10-14","shift_id":8,"status":"full","staff_id":null},{"id":131,"work_date":"2026-10-14","shift_id":9,"status":"approved","staff_id":"s8"},{"id":132,"work_date":"2026-10-14","shift_id":10,"status":"approved","staff_id":"s2"},{"id":133,"work_date":"2026-10-15","shift_id":7,"status":"approved","staff_id":"s10"},{"id":134,"work_date":"2026-10-15","shift_id":8,"status":"full","staff_id":null},{"id":135,"work_date":"2026-10-15","shift_id":9,"status":"approved","staff_id":"s8"},{"id":136,"work_date":"2026-10-15","shift_id":10,"status":"approved","staff_id":"s2"},{"id":137,"work_date":"2026-10-16","shift_id":7,"status":"approved","staff_id":"s10"},{"id":138,"work_date":"2026-10-16","shift_id":8,"status":"full","staff_id":null},{"id":139,"work_date":"2026-10-16","shift_id":9,"status":"approved","staff_id":"s8"},{"id":140,"work_date":"2026-10-16","shift_id":10,"status":"approved","staff_id":"s3"},{"id":141,"work_date":"2026-10-17","shift_id":7,"status":"open","staff_id":null},{"id":142,"work_date":"2026-10-17","shift_id":8,"status":"full","staff_id":null},{"id":143,"work_date":"2026-10-17","shift_id":9,"status":"approved","staff_id":"s12"},{"id":144,"work_date":"2026-10-17","shift_id":10,"status":"approved","staff_id":"s11"},{"id":145,"work_date":"2026-10-18","shift_id":7,"status":"open","staff_id":null},{"id":146,"work_date":"2026-10-18","shift_id":8,"status":"full","staff_id":null},{"id":147,"work_date":"2026-10-18","shift_id":9,"status":"approved","staff_id":"s9"},{"id":148,"work_date":"2026-10-18","shift_id":10,"status":"open","staff_id":null},{"id":149,"work_date":"2026-10-19","shift_id":7,"status":"full","staff_id":null},{"id":150,"work_date":"2026-10-19","shift_id":8,"status":"approved","staff_id":"s10"},{"id":151,"work_date":"2026-10-19","shift_id":9,"status":"full","staff_id":null},{"id":152,"work_date":"2026-10-19","shift_id":10,"status":"approved","staff_id":"s2"},{"id":153,"work_date":"2026-10-20","shift_id":7,"status":"full","staff_id":null},{"id":154,"work_date":"2026-10-20","shift_id":8,"status":"approved","staff_id":"s10"},{"id":155,"work_date":"2026-10-20","shift_id":9,"status":"full","staff_id":null},{"id":156,"work_date":"2026-10-20","shift_id":10,"status":"approved","staff_id":"s2"},{"id":157,"work_date":"2026-10-21","shift_id":7,"status":"approved","staff_id":"s10"},{"id":158,"work_date":"2026-10-21","shift_id":8,"status":"full","staff_id":null},{"id":159,"work_date":"2026-10-21","shift_id":9,"status":"approved","staff_id":"s8"},{"id":160,"work_date":"2026-10-21","shift_id":10,"status":"approved","staff_id":"s2"},{"id":161,"work_date":"2026-10-22","shift_id":7,"status":"approved","staff_id":"s10"},{"id":162,"work_date":"2026-10-22","shift_id":8,"status":"full","staff_id":null},{"id":163,"work_date":"2026-10-22","shift_id":9,"status":"approved","staff_id":"s8"},{"id":164,"work_date":"2026-10-22","shift_id":10,"status":"approved","staff_id":"s2"},{"id":165,"work_date":"2026-10-23","shift_id":7,"status":"full","staff_id":null},{"id":166,"work_date":"2026-10-23","shift_id":8,"status":"approved","staff_id":"s4"},{"id":167,"work_date":"2026-10-23","shift_id":9,"status":"full","staff_id":null},{"id":168,"work_date":"2026-10-23","shift_id":10,"status":"approved","staff_id":"s2"},{"id":169,"work_date":"2026-10-24","shift_id":7,"status":"open","staff_id":null},{"id":170,"work_date":"2026-10-24","shift_id":8,"status":"full","staff_id":null},{"id":171,"work_date":"2026-10-24","shift_id":9,"status":"approved","staff_id":"s5"},{"id":172,"work_date":"2026-10-24","shift_id":10,"status":"approved","staff_id":"s15"},{"id":173,"work_date":"2026-10-25","shift_id":7,"status":"open","staff_id":null},{"id":174,"work_date":"2026-10-25","shift_id":8,"status":"full","staff_id":null},{"id":175,"work_date":"2026-10-25","shift_id":9,"status":"approved","staff_id":"s5"},{"id":176,"work_date":"2026-10-25","shift_id":10,"status":"open","staff_id":null},{"id":177,"work_date":"2026-10-26","shift_id":7,"status":"approved","staff_id":"s4"},{"id":178,"work_date":"2026-10-26","shift_id":8,"status":"full","staff_id":null},{"id":179,"work_date":"2026-10-26","shift_id":9,"status":"approved","staff_id":"s8"},{"id":180,"work_date":"2026-10-26","shift_id":10,"status":"open","staff_id":null},{"id":181,"work_date":"2026-10-27","shift_id":7,"status":"approved","staff_id":"s4"},{"id":182,"work_date":"2026-10-27","shift_id":8,"status":"full","staff_id":null},{"id":183,"work_date":"2026-10-27","shift_id":9,"status":"approved","staff_id":"s8"},{"id":184,"work_date":"2026-10-27","shift_id":10,"status":"open","staff_id":null},{"id":185,"work_date":"2026-10-28","shift_id":7,"status":"approved","staff_id":"s10"},{"id":186,"work_date":"2026-10-28","shift_id":8,"status":"full","staff_id":null},{"id":187,"work_date":"2026-10-28","shift_id":9,"status":"approved","staff_id":"s8"},{"id":188,"work_date":"2026-10-28","shift_id":10,"status":"approved","staff_id":"s2"},{"id":189,"work_date":"2026-10-29","shift_id":7,"status":"approved","staff_id":"s10"},{"id":190,"work_date":"2026-10-29","shift_id":8,"status":"full","staff_id":null},{"id":191,"work_date":"2026-10-29","shift_id":9,"status":"approved","staff_id":"s8"},{"id":192,"work_date":"2026-10-29","shift_id":10,"status":"approved","staff_id":"s2"},{"id":193,"work_date":"2026-10-30","shift_id":7,"status":"approved","staff_id":"s10"},{"id":194,"work_date":"2026-10-30","shift_id":8,"status":"full","staff_id":null},{"id":195,"work_date":"2026-10-30","shift_id":9,"status":"approved","staff_id":"s4"},{"id":196,"work_date":"2026-10-30","shift_id":10,"status":"approved","staff_id":"s3"},{"id":197,"work_date":"2026-10-31","shift_id":7,"status":"full","staff_id":null},{"id":198,"work_date":"2026-10-31","shift_id":8,"status":"approved","staff_id":"s5"},{"id":199,"work_date":"2026-10-31","shift_id":9,"status":"full","staff_id":null},{"id":200,"work_date":"2026-10-31","shift_id":10,"status":"approved","staff_id":"s2"},{"id":201,"work_date":"2026-10-12","shift_id":11,"status":"full","staff_id":null},{"id":202,"work_date":"2026-10-12","shift_id":12,"status":"open","staff_id":null},{"id":203,"work_date":"2026-10-12","shift_id":13,"status":"full","staff_id":null},{"id":204,"work_date":"2026-10-12","shift_id":14,"status":"approved","staff_id":"s2"},{"id":205,"work_date":"2026-10-13","shift_id":11,"status":"approved","staff_id":"s3"},{"id":206,"work_date":"2026-10-13","shift_id":12,"status":"full","staff_id":null},{"id":207,"work_date":"2026-10-13","shift_id":13,"status":"approved","staff_id":"s7"},{"id":208,"work_date":"2026-10-13","shift_id":14,"status":"approved","staff_id":"s13"},{"id":209,"work_date":"2026-10-14","shift_id":11,"status":"approved","staff_id":"s5"},{"id":210,"work_date":"2026-10-14","shift_id":12,"status":"full","staff_id":null},{"id":211,"work_date":"2026-10-14","shift_id":13,"status":"open","staff_id":null},{"id":212,"work_date":"2026-10-14","shift_id":14,"status":"open","staff_id":null},{"id":213,"work_date":"2026-10-15","shift_id":11,"status":"full","staff_id":null},{"id":214,"work_date":"2026-10-15","shift_id":12,"status":"approved","staff_id":"s5"},{"id":215,"work_date":"2026-10-15","shift_id":13,"status":"full","staff_id":null},{"id":216,"work_date":"2026-10-15","shift_id":14,"status":"approved","staff_id":"s13"},{"id":217,"work_date":"2026-10-16","shift_id":11,"status":"approved","staff_id":"s5"},{"id":218,"work_date":"2026-10-16","shift_id":12,"status":"full","staff_id":null},{"id":219,"work_date":"2026-10-16","shift_id":13,"status":"open","staff_id":null},{"id":220,"work_date":"2026-10-16","shift_id":14,"status":"approved","staff_id":"s7"},{"id":221,"work_date":"2026-10-17","shift_id":11,"status":"open","staff_id":null},{"id":222,"work_date":"2026-10-17","shift_id":12,"status":"open","staff_id":null},{"id":223,"work_date":"2026-10-17","shift_id":13,"status":"open","staff_id":null},{"id":224,"work_date":"2026-10-17","shift_id":14,"status":"open","staff_id":null},{"id":225,"work_date":"2026-10-18","shift_id":11,"status":"open","staff_id":null},{"id":226,"work_date":"2026-10-18","shift_id":12,"status":"full","staff_id":null},{"id":227,"work_date":"2026-10-18","shift_id":13,"status":"approved","staff_id":"s6"},{"id":228,"work_date":"2026-10-18","shift_id":14,"status":"open","staff_id":null},{"id":229,"work_date":"2026-10-19","shift_id":11,"status":"approved","staff_id":"s4"},{"id":230,"work_date":"2026-10-19","shift_id":12,"status":"full","staff_id":null},{"id":231,"work_date":"2026-10-19","shift_id":13,"status":"approved","staff_id":"s8"},{"id":232,"work_date":"2026-10-19","shift_id":14,"status":"open","staff_id":null},{"id":233,"work_date":"2026-10-20","shift_id":11,"status":"full","staff_id":null},{"id":234,"work_date":"2026-10-20","shift_id":12,"status":"approved","staff_id":"s4"},{"id":235,"work_date":"2026-10-20","shift_id":13,"status":"full","staff_id":null},{"id":236,"work_date":"2026-10-20","shift_id":14,"status":"open","staff_id":null},{"id":237,"work_date":"2026-10-21","shift_id":11,"status":"approved","staff_id":"s5"},{"id":238,"work_date":"2026-10-21","shift_id":12,"status":"full","staff_id":null},{"id":239,"work_date":"2026-10-21","shift_id":13,"status":"open","staff_id":null},{"id":240,"work_date":"2026-10-21","shift_id":14,"status":"open","staff_id":null},{"id":241,"work_date":"2026-10-22","shift_id":11,"status":"full","staff_id":null},{"id":242,"work_date":"2026-10-22","shift_id":12,"status":"approved","staff_id":"s4"},{"id":243,"work_date":"2026-10-22","shift_id":13,"status":"full","staff_id":null},{"id":244,"work_date":"2026-10-22","shift_id":14,"status":"approved","staff_id":"s15"},{"id":245,"work_date":"2026-10-23","shift_id":11,"status":"approved","staff_id":"s10"},{"id":246,"work_date":"2026-10-23","shift_id":12,"status":"full","staff_id":null},{"id":247,"work_date":"2026-10-23","shift_id":13,"status":"open","staff_id":null},{"id":248,"work_date":"2026-10-23","shift_id":14,"status":"approved","staff_id":"s7"},{"id":249,"work_date":"2026-10-24","shift_id":11,"status":"open","staff_id":null},{"id":250,"work_date":"2026-10-24","shift_id":12,"status":"open","staff_id":null},{"id":251,"work_date":"2026-10-24","shift_id":13,"status":"open","staff_id":null},{"id":252,"work_date":"2026-10-24","shift_id":14,"status":"approved","staff_id":"s11"},{"id":253,"work_date":"2026-10-25","shift_id":11,"status":"open","staff_id":null},{"id":254,"work_date":"2026-10-25","shift_id":12,"status":"full","staff_id":null},{"id":255,"work_date":"2026-10-25","shift_id":13,"status":"approved","staff_id":"s6"},{"id":256,"work_date":"2026-10-25","shift_id":14,"status":"open","staff_id":null},{"id":257,"work_date":"2026-10-26","shift_id":11,"status":"open","staff_id":null},{"id":258,"work_date":"2026-10-26","shift_id":12,"status":"full","staff_id":null},{"id":259,"work_date":"2026-10-26","shift_id":13,"status":"approved","staff_id":"s4"},{"id":260,"work_date":"2026-10-26","shift_id":14,"status":"open","staff_id":null},{"id":261,"work_date":"2026-10-27","shift_id":11,"status":"approved","staff_id":"s5"},{"id":262,"work_date":"2026-10-27","shift_id":12,"status":"full","staff_id":null},{"id":263,"work_date":"2026-10-27","shift_id":13,"status":"approved","staff_id":"s4"},{"id":264,"work_date":"2026-10-27","shift_id":14,"status":"open","staff_id":null},{"id":265,"work_date":"2026-10-28","shift_id":11,"status":"approved","staff_id":"s5"},{"id":266,"work_date":"2026-10-28","shift_id":12,"status":"full","staff_id":null},{"id":267,"work_date":"2026-10-28","shift_id":13,"status":"open","staff_id":null},{"id":268,"work_date":"2026-10-28","shift_id":14,"status":"open","staff_id":null},{"id":269,"work_date":"2026-10-29","shift_id":11,"status":"full","staff_id":null},{"id":270,"work_date":"2026-10-29","shift_id":12,"status":"approved","staff_id":"s4"},{"id":271,"work_date":"2026-10-29","shift_id":13,"status":"full","staff_id":null},{"id":272,"work_date":"2026-10-29","shift_id":14,"status":"open","staff_id":null},{"id":273,"work_date":"2026-10-30","shift_id":11,"status":"approved","staff_id":"s5"},{"id":274,"work_date":"2026-10-30","shift_id":12,"status":"full","staff_id":null},{"id":275,"work_date":"2026-10-30","shift_id":13,"status":"open","staff_id":null},{"id":276,"work_date":"2026-10-30","shift_id":14,"status":"approved","staff_id":"s2"},{"id":277,"work_date":"2026-10-31","shift_id":11,"status":"open","staff_id":null},{"id":278,"work_date":"2026-10-31","shift_id":12,"status":"full","staff_id":null},{"id":279,"work_date":"2026-10-31","shift_id":13,"status":"approved","staff_id":"s4"},{"id":280,"work_date":"2026-10-31","shift_id":14,"status":"open","staff_id":null},{"id":281,"work_date":"2026-10-12","shift_id":15,"status":"open","staff_id":null},{"id":282,"work_date":"2026-10-12","shift_id":16,"status":"full","staff_id":null},{"id":283,"work_date":"2026-10-12","shift_id":17,"status":"open","staff_id":null},{"id":284,"work_date":"2026-10-12","shift_id":18,"status":"approved","staff_id":"s13"},{"id":285,"work_date":"2026-10-13","shift_id":15,"status":"approved","staff_id":"s5"},{"id":286,"work_date":"2026-10-13","shift_id":16,"status":"full","staff_id":null},{"id":287,"work_date":"2026-10-13","shift_id":17,"status":"open","staff_id":null},{"id":288,"work_date":"2026-10-13","shift_id":18,"status":"open","staff_id":null},{"id":289,"work_date":"2026-10-14","shift_id":15,"status":"open","staff_id":null},{"id":290,"work_date":"2026-10-14","shift_id":16,"status":"open","staff_id":null},{"id":291,"work_date":"2026-10-14","shift_id":17,"status":"open","staff_id":null},{"id":292,"work_date":"2026-10-14","shift_id":18,"status":"open","staff_id":null},{"id":293,"work_date":"2026-10-15","shift_id":15,"status":"full","staff_id":null},{"id":294,"work_date":"2026-10-15","shift_id":16,"status":"approved","staff_id":"s6"},{"id":295,"work_date":"2026-10-15","shift_id":17,"status":"full","staff_id":null},{"id":296,"work_date":"2026-10-15","shift_id":18,"status":"open","staff_id":null},{"id":297,"work_date":"2026-10-16","shift_id":15,"status":"open","staff_id":null},{"id":298,"work_date":"2026-10-16","shift_id":16,"status":"open","staff_id":null},{"id":299,"work_date":"2026-10-16","shift_id":17,"status":"open","staff_id":null},{"id":300,"work_date":"2026-10-16","shift_id":18,"status":"open","staff_id":null},{"id":301,"work_date":"2026-10-17","shift_id":15,"status":"open","staff_id":null},{"id":302,"work_date":"2026-10-17","shift_id":16,"status":"open","staff_id":null},{"id":303,"work_date":"2026-10-17","shift_id":17,"status":"open","staff_id":null},{"id":304,"work_date":"2026-10-17","shift_id":18,"status":"open","staff_id":null},{"id":305,"work_date":"2026-10-18","shift_id":15,"status":"full","staff_id":null},{"id":306,"work_date":"2026-10-18","shift_id":16,"status":"approved","staff_id":"s14"},{"id":307,"work_date":"2026-10-18","shift_id":17,"status":"full","staff_id":null},{"id":308,"work_date":"2026-10-18","shift_id":18,"status":"open","staff_id":null},{"id":309,"work_date":"2026-10-19","shift_id":15,"status":"open","staff_id":null},{"id":310,"work_date":"2026-10-19","shift_id":16,"status":"full","staff_id":null},{"id":311,"work_date":"2026-10-19","shift_id":17,"status":"open","staff_id":null},{"id":312,"work_date":"2026-10-19","shift_id":18,"status":"open","staff_id":null},{"id":313,"work_date":"2026-10-20","shift_id":15,"status":"approved","staff_id":"s5"},{"id":314,"work_date":"2026-10-20","shift_id":16,"status":"full","staff_id":null},{"id":315,"work_date":"2026-10-20","shift_id":17,"status":"approved","staff_id":"s8"},{"id":316,"work_date":"2026-10-20","shift_id":18,"status":"open","staff_id":null},{"id":317,"work_date":"2026-10-21","shift_id":15,"status":"open","staff_id":null},{"id":318,"work_date":"2026-10-21","shift_id":16,"status":"open","staff_id":null},{"id":319,"work_date":"2026-10-21","shift_id":17,"status":"open","staff_id":null},{"id":320,"work_date":"2026-10-21","shift_id":18,"status":"open","staff_id":null},{"id":321,"work_date":"2026-10-22","shift_id":15,"status":"approved","staff_id":"s5"},{"id":322,"work_date":"2026-10-22","shift_id":16,"status":"full","staff_id":null},{"id":323,"work_date":"2026-10-22","shift_id":17,"status":"approved","staff_id":"s6"},{"id":324,"work_date":"2026-10-22","shift_id":18,"status":"approved","staff_id":"s7"},{"id":325,"work_date":"2026-10-23","shift_id":15,"status":"approved","staff_id":"s5"},{"id":326,"work_date":"2026-10-23","shift_id":16,"status":"full","staff_id":null},{"id":327,"work_date":"2026-10-23","shift_id":17,"status":"open","staff_id":null},{"id":328,"work_date":"2026-10-23","shift_id":18,"status":"open","staff_id":null},{"id":329,"work_date":"2026-10-24","shift_id":15,"status":"open","staff_id":null},{"id":330,"work_date":"2026-10-24","shift_id":16,"status":"open","staff_id":null},{"id":331,"work_date":"2026-10-24","shift_id":17,"status":"open","staff_id":null},{"id":332,"work_date":"2026-10-24","shift_id":18,"status":"open","staff_id":null},{"id":333,"work_date":"2026-10-25","shift_id":15,"status":"open","staff_id":null},{"id":334,"work_date":"2026-10-25","shift_id":16,"status":"open","staff_id":null},{"id":335,"work_date":"2026-10-25","shift_id":17,"status":"open","staff_id":null},{"id":336,"work_date":"2026-10-25","shift_id":18,"status":"open","staff_id":null},{"id":337,"work_date":"2026-10-26","shift_id":15,"status":"open","staff_id":null},{"id":338,"work_date":"2026-10-26","shift_id":16,"status":"full","staff_id":null},{"id":339,"work_date":"2026-10-26","shift_id":17,"status":"open","staff_id":null},{"id":340,"work_date":"2026-10-26","shift_id":18,"status":"open","staff_id":null},{"id":341,"work_date":"2026-10-27","shift_id":15,"status":"open","staff_id":null},{"id":342,"work_date":"2026-10-27","shift_id":16,"status":"full","staff_id":null},{"id":343,"work_date":"2026-10-27","shift_id":17,"status":"open","staff_id":null},{"id":344,"work_date":"2026-10-27","shift_id":18,"status":"open","staff_id":null},{"id":345,"work_date":"2026-10-28","shift_id":15,"status":"open","staff_id":null},{"id":346,"work_date":"2026-10-28","shift_id":16,"status":"full","staff_id":null},{"id":347,"work_date":"2026-10-28","shift_id":17,"status":"open","staff_id":null},{"id":348,"work_date":"2026-10-28","shift_id":18,"status":"open","staff_id":null},{"id":349,"work_date":"2026-10-29","shift_id":15,"status":"full","staff_id":null},{"id":350,"work_date":"2026-10-29","shift_id":16,"status":"approved","staff_id":"s5"},{"id":351,"work_date":"2026-10-29","shift_id":17,"status":"full","staff_id":null},{"id":352,"work_date":"2026-10-29","shift_id":18,"status":"open","staff_id":null},{"id":353,"work_date":"2026-10-30","shift_id":15,"status":"open","staff_id":null},{"id":354,"work_date":"2026-10-30","shift_id":16,"status":"full","staff_id":null},{"id":355,"work_date":"2026-10-30","shift_id":17,"status":"open","staff_id":null},{"id":356,"work_date":"2026-10-30","shift_id":18,"status":"open","staff_id":null},{"id":357,"work_date":"2026-10-31","shift_id":15,"status":"open","staff_id":null},{"id":358,"work_date":"2026-10-31","shift_id":16,"status":"full","staff_id":null},{"id":359,"work_date":"2026-10-31","shift_id":17,"status":"open","staff_id":null},{"id":360,"work_date":"2026-10-31","shift_id":18,"status":"open","staff_id":null}]};
 
@@ -472,11 +470,9 @@ function makeLiveApi() {
       const { data, error } = await sb.from("leaves").select("*").gte("work_date", from).lte("work_date", to).order("requested_at");
       if (error) throw error; return data;
     },
-    async loadPay(periodStart) {
-      const [c, st, it, op] = await Promise.all([sb.from("pay_config").select("*"), sb.from("pay_staff").select("*"),
-        sb.from("pay_items").select("*").eq("period_start", periodStart).order("id"), sb.from("pay_slot_opts").select("*").limit(20000)]);
-      for (const r of [c, st, it, op]) if (r.error) throw r.error;
-      return { config: c.data, staff: st.data, items: it.data, opts: op.data };
+    async loadPayReports() {
+      const { data, error } = await sb.from("pay_reports").select("*").order("key");
+      if (error) throw error; return data || [];
     },
     async rpc(name, args) {
       const { data, error } = await sb.rpc(name, args);
@@ -515,18 +511,21 @@ function makeDemoApi() {
   };
   const meRow = () => D.staff.find(s => s.id === meId);
   const find = id => D.slots.find(s => s.id === id);
-  D.pay = { config: [], staff: [], items: [], opts: [] }; let payItemId = 1;
-  { const T = { "ต้อยติ่ง": "REG", "เก๊กฮวย": "REG", "กะแต": "REG", "Pukkyy": "REG", "แก้ม": "VIP" };
-    D.staff.forEach(s => D.pay.staff.push({ id: s.id, rate_type: T[s.nickname] || "PT", full_name: "", bank: "", account_no: "", phone: "", start_date: null, sso: 0, note: null })); }
-  const needAdmin = () => { if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); };
+  // demo payroll report: invented numbers (never ship real payroll in this public file)
+  D.payReports = [];
+  { const ppl = D.staff.filter(s => s.role !== "admin" && s.active).slice(0, 12); let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    for (const [y, m, a, b] of [[2026, 8, 1, 15], [2026, 8, 16, 31], [2026, 9, 1, 15], [2026, 9, 16, 30], [2026, 10, 1, 15], [2026, 10, 16, 31]]) {
+      const pad = n => String(n).padStart(2, "0");
+      const rows = ppl.map((s, i) => { const reg = i < 4; const n1 = Math.round(rnd() * 9) + 1, n2 = Math.round(rnd() * 4); const r1 = reg ? 700 : 650, r2 = reg ? 500 : 400;
+        const shifts = [{ label: "05.00-17.00น.", unit: "วัน", n: n1, rate: r1, amt: n1 * r1 }, ...(n2 ? [{ label: "08.00-17.00น.", unit: "วัน", n: n2, rate: r2, amt: n2 * r2 }] : [])];
+        const gross = shifts.reduce((t, x) => t + x.amt, 0); const adj = [];
+        if (b > 16 && rnd() > .7) adj.push({ label: "เบี้ยขยัน 26 วัน", amt: 1000, plus: true }); if (rnd() > .75) adj.push({ label: "มาสาย", amt: Math.round(rnd() * 10) * 20, plus: false });
+        const plus = adj.filter(x => x.plus).reduce((t, x) => t + x.amt, 0), minus = adj.filter(x => !x.plus).reduce((t, x) => t + x.amt, 0);
+        return { nick: s.nickname, full: "", type: reg ? "เรตประจำ" : "PT", shifts, gross, adj, plus, minus, net: gross + plus - minus, other: 0, note: "" }; }).filter(r => r.gross);
+      D.payReports.push({ key: `${y}-${pad(m)}-${pad(a)}`, d1: `${y}-${pad(m)}-${pad(a)}`, d2: `${y}-${pad(m)}-${pad(b)}`, sheet: `${a}-${b} (ตัวอย่าง)`, title: `ข้อมูลตัวอย่างโหมดเดโม ${a}-${b}`, rows, updated_at: new Date().toISOString() });
+    } }
   const fns = {
-    admin_pay_set_config({ p_key, p_value }) { needAdmin(); const r = D.pay.config.find(c => c.key === p_key); if (r) r.value = p_value; else D.pay.config.push({ key: p_key, value: p_value }); return true; },
-    admin_pay_save_staff(a) { needAdmin(); let r = D.pay.staff.find(x => x.id === a.p_id); if (!r) { r = { id: a.p_id }; D.pay.staff.push(r); }
-      Object.assign(r, { rate_type: a.p_rate_type || "PT", full_name: a.p_full_name, bank: a.p_bank, account_no: a.p_account_no, phone: a.p_phone, start_date: a.p_start_date, sso: Number(a.p_sso) || 0, note: a.p_note }); return r; },
-    admin_pay_add_item(a) { needAdmin(); const d = +String(a.p_period_start).slice(8, 10); if (![1, 16].includes(d)) throw new Error("รอบต้องเริ่มวันที่ 1 หรือ 16"); if (!(Number(a.p_amount) > 0)) throw new Error("จำนวนเงินต้องมากกว่า 0");
-      const r = { id: payItemId++, staff_id: a.p_staff_id, period_start: a.p_period_start, kind: a.p_kind, amount: Number(a.p_amount), qty: a.p_qty, note: a.p_note || null }; D.pay.items.push(r); return r; },
-    admin_pay_delete_item({ p_id }) { needAdmin(); const i = D.pay.items.findIndex(x => x.id === p_id); if (i < 0) throw new Error("ไม่พบรายการ"); D.pay.items.splice(i, 1); return true; },
-    admin_pay_set_slot_opt({ p_slot_id, p_opt }) { needAdmin(); const s = find(p_slot_id); D.pay.opts = D.pay.opts.filter(o => o.id !== p_slot_id); if (p_opt) D.pay.opts.push({ id: p_slot_id, staff_id: s.staff_id, opt: p_opt }); return true; },
+    admin_pay_import({ p_periods }) { if (meRow().role !== "admin") throw new Error("เฉพาะแอดมิน"); for (const p of p_periods) { const i = D.payReports.findIndex(x => x.key === p.key); const r = { ...p, updated_at: new Date().toISOString() }; if (i >= 0) D.payReports[i] = r; else D.payReports.push(r); } return p_periods.length; },
     claim_staff() { return meRow(); },
     request_booking({ p_slot_id }) { const s = find(p_slot_id); if (s.status !== "open") throw new Error("ช่องนี้ไม่ว่างแล้ว มีคนจองก่อนหน้า");
       const ov = overlapTaker(S.slots.get(p_slot_id)); if (ov) throw new Error(`กะ ${shiftById(s.shift_id).label} ทับกับกะ ${ov.sh.label} ที่ ${ov.st?.nickname || "มีคน"} ลงไว้แล้ว`);
@@ -582,7 +581,7 @@ function makeDemoApi() {
       }
       return res;
     },
-    async loadPay(periodStart) { if (meRow().role !== "admin") return { config: [], staff: [], items: [], opts: [] }; return JSON.parse(JSON.stringify({ ...D.pay, items: D.pay.items.filter(i => i.period_start === periodStart) })); },
+    async loadPayReports() { if (meRow().role !== "admin") return []; return JSON.parse(JSON.stringify(D.payReports)); },
     async loadAudit(fromIso, toIso, beforeId) { return D.audit.filter(a => a.at >= fromIso && a.at < toIso && (!beforeId || a.id < beforeId)).slice(0, 400); },
     async slotHistory(id) { return D.audit.filter(a => (a.table_name === "slots" && a.row_id === String(id)) || (a.table_name === "leaves" && String((a.new_data || a.old_data).slot_id) === String(id))); },
     subscribe(onEvt, onStatus) { listener = onEvt; setTimeout(() => onStatus(true), 400); },
@@ -821,7 +820,7 @@ function render() {
   const pendingCount = [...S.slots.values()].filter(s => s.status === "pending").length + [...S.leaves.values()].filter(l => l.status === "pending").length;
   const tabs = isAdmin() ? [["overview", "ภาพรวม"], ["summary", "สรุปรายคน"]] : [["overview", "ภาพรวม"], ["mine", "กะของฉัน"], ["summary", "สรุปรายคน"]];
   if (S.tab === "mine" && isAdmin()) S.tab = "overview";
-  if (isAdmin()) { tabs.push(["admin", `แอดมิน${pendingCount ? ` <span class="badge">${pendingCount}</span>` : ""}`]); tabs.push(["pay", "คิดเงิน"]); tabs.push(["log", "ประวัติ"]); }
+  if (isAdmin()) { tabs.push(["admin", `แอดมิน${pendingCount ? ` <span class="badge">${pendingCount}</span>` : ""}`]); tabs.push(["pay", "Payroll"]); tabs.push(["log", "ประวัติ"]); }
   if ((S.tab === "log" || S.tab === "pay") && !isAdmin()) S.tab = "overview";
   if (S.tab === "admin" && !isAdmin()) S.tab = "overview";
   main.innerHTML = `
@@ -1295,7 +1294,7 @@ function confirmCancel(id) {
 }
 
 /* ===== Audit log ===== */
-const LOG_CAT = { slots: "กะ", leaves: "การลา", staff: "พนักงาน", channels: "ตั้งค่า", shifts: "ตั้งค่า", app_config: "ตั้งค่า", pay_config: "เงินเดือน", pay_staff: "เงินเดือน", pay_items: "เงินเดือน", pay_slot_opts: "เงินเดือน" };
+const LOG_CAT = { slots: "กะ", leaves: "การลา", staff: "พนักงาน", channels: "ตั้งค่า", shifts: "ตั้งค่า", app_config: "ตั้งค่า", pay_reports: "เงินเดือน" };
 const shortDate = ds => { if (!ds) return ""; const p = parseD(ds); return `${WD_S[p.wd]} ${p.d} ${TH_MON_S[p.m - 1]}`; };
 const nameOf = id => id ? (staffById(id)?.nickname || "?") : "";
 function slotDesc(d) { if (!d) return ""; const sh = shiftById(d.shift_id); const c = sh && chanById(sh.channel_id); return `${c ? c.name : "?"} ${sh ? sh.label : ""} · ${shortDate(d.work_date)}`; }
@@ -1331,11 +1330,7 @@ function describeLog(e) {
     return { actor, text, cat: "การลา" };
   } else if (e.table_name.startsWith("pay_")) {
     const d = e.op === "DELETE" ? o : n;
-    if (e.table_name === "pay_items") { const k = (typeof PAY_KINDS !== "undefined" && PAY_KINDS[d.kind]) || { t: d.kind, s: 1 };
-      text = `${e.op === "DELETE" ? "ลบ" : "เพิ่ม"}รายการ${k.s > 0 ? "บวก" : "หัก"} <b>${esc(nameOf(d.staff_id))}</b> — ${esc(k.t)} ${Number(d.amount).toLocaleString("th-TH")} บาท (รอบ ${shortDate(d.period_start)})`; }
-    else if (e.table_name === "pay_staff") text = `แก้ข้อมูลเงินเดือนของ <b>${esc(nameOf(d.id))}</b>${ch.length ? ` (${ch.filter(k => k !== "updated_at").map(k => ({ rate_type: "เรตจ้าง", full_name: "ชื่อ", bank: "ธนาคาร", account_no: "เลขบัญชี", phone: "เบอร์", start_date: "วันเริ่มงาน", sso: "ประกันสังคม", note: "หมายเหตุ" }[k] || k)).join(", ")})` : ""}`;
-    else if (e.table_name === "pay_slot_opts") text = `${e.op === "DELETE" ? "ยกเลิกตัวเลือก" : (d.opt === "break" ? "ตั้งกะดึกเป็น 'พัก'" : "ตั้ง 'ไม่จ่าย'")} ให้กะของ <b>${esc(nameOf(d.staff_id))}</b>`;
-    else text = "แก้ไขเรตค่าจ้าง";
+    text = e.table_name === "pay_reports" ? `${e.op === "INSERT" ? "นำเข้า" : e.op === "DELETE" ? "ลบ" : "อัปเดต"}รายงานเงินเดือน รอบ ${esc(d.sheet || d.key || "")}` : "แก้ข้อมูลเงินเดือน";
     return { actor, text, cat: "เงินเดือน" };
   } else if (e.table_name === "staff") {
     const who = `<b>${esc(n.nickname || o.nickname)}</b>`;
@@ -1528,285 +1523,226 @@ function adminSlot(s) {
   };
 }
 
-/* ===== Payroll (คิดเงิน) — admin only ===== */
-const PAY_COLS = [
-  ["L0508", "05.00-08.00", "05-08"], ["L0517", "05.00-17.00 (3 กะ)", "05-17"], ["L0817", "08.00-17.00", "08-17"],
-  ["L1705", "17.00-05.00 ไม่พัก", "17-05"], ["L1705B", "17.00-05.00 พัก 1 ชม.", "17-05 พัก"],
-  ["S0817", "ซัพพอต 08.00-17.00", "ซัพ 08-17"], ["S2308", "ซัพพอต 23.00-08.00", "ซัพ 23-08"],
-  ["S0817SUN", "ซัพพอต 08.00-17.00 (วันอาทิตย์)", "ซัพ 08-17 อา."], ["S2308SUN", "ซัพพอต 23.00-08.00 (วันอาทิตย์)", "ซัพ 23-08 อา."]];
-const PAY_COL = Object.fromEntries(PAY_COLS.map(([k, t, s]) => [k, { t, s }]));
-const PAY_KINDS = {
-  bonus: { t: "เบี้ยขยัน", s: 1 }, tiktok: { t: "ค่า TikTok Live", s: 1, u: "tiktok", q: "ชม." }, travel: { t: "ค่าเดินทาง (ฝนตก/น้ำท่วม)", s: 1 }, plus_other: { t: "บวกอื่นๆ", s: 1 },
-  sso: { t: "ประกันสังคม", s: -1 }, late: { t: "มาสาย", s: -1, u: "late", q: "นาที" }, sudden: { t: "ลากะทันหัน", s: -1, u: "sudden", q: "ครั้ง" },
-  incomplete: { t: "ทำงานไม่ครบตามตาราง", s: -1, u: "incomplete", q: "ครั้ง" }, link: { t: "ลืมแชร์ลิงก์", s: -1, u: "link", q: "ครั้ง" },
-  medcert: { t: "ไม่ส่งใบรับรองแพทย์", s: -1, u: "medcert", q: "ครั้ง" }, loan: { t: "หักเงินยืม", s: -1 }, minus_other: { t: "หักอื่นๆ", s: -1 }
-};
-const PAY_PLUS = Object.keys(PAY_KINDS).filter(k => PAY_KINDS[k].s > 0), PAY_MINUS = Object.keys(PAY_KINDS).filter(k => PAY_KINDS[k].s < 0);
-const PAY_DEFAULT = {
-  types: [{ code: "PT", name: "Part-time (3 เดือนแรก)" }, { code: "REG", name: "ประจำ (เดือนที่ 4)" }, { code: "VIP", name: "ประจำ VIP" }],
-  rates: {
-    PT: { L0508: 150, L0517: 650, L0817: 400, L1705: 700, L1705B: 650, S0817: 400, S2308: 400, S0817SUN: 400, S2308SUN: 450 },
-    REG: { L0508: 186, L0517: 700, L0817: 500, L1705: 750, L1705B: 700, S0817: 500, S2308: 450, S0817SUN: 400, S2308SUN: 450 },
-    VIP: { L0508: 186, L0517: 700, L0817: 500, L1705: 750, L1705B: 700, S0817: 500, S2308: 450, S0817SUN: 400, S2308SUN: 450 }
-  },
-  unit: { late: 20, link: 50, tiktok: 100, sudden: 500, medcert: 500, incomplete: 200 },
-  bonus: { days: 26, amount: 1000 }
-};
+/* ===== Payroll report: parse the payroll Excel (one sheet per pay period) ===== */
+const PR_MON = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+const PR_TH_MON = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+const PR_PLUS_RE = /เบี้ย|รางวัล|แก?ร[๊]?บ|เดินทาง|tiktok|โบนัส|ค่าเช่าบัญชี|ค่าไฟ|ค่าเน็?ต|ค่าคอม|เพิ่ม/i;
+function prNum(v) { if (v === null || v === undefined || v === "") return null; if (typeof v === "number") return isFinite(v) ? v : null; const s = String(v).replace(/[,฿\s]/g, ""); if (!/^-?\d+(\.\d+)?$/.test(s)) return null; return Number(s); }
+function prClean(v) { return v === null || v === undefined ? "" : String(v).replace(/\s+/g, " ").trim(); }
+function prPeriod(name, title, fallbackYear) {
+  const s = `${name} ${title}`;
+  let m = String(name).match(/(\d{1,2})\s*-\s*(\d{1,2})\s*([A-Za-z]+)/), mon = null, d1, d2;
+  if (m) { d1 = +m[1]; d2 = +m[2]; mon = PR_MON[m[3].slice(0, 3).toLowerCase()] || null; }
+  if (!mon) { const t = String(title).match(/(\d{1,2})\s*-\s*(\d{1,2})\s*([^\s\/]+)/); if (t) { d1 = +t[1]; d2 = +t[2]; const i = PR_TH_MON.findIndex(x => t[3].startsWith(x)); if (i >= 0) mon = i + 1; else mon = PR_MON[t[3].slice(0, 3).toLowerCase()] || null; } }
+  if (!mon || !d1 || !d2) return null;
+  let year = fallbackYear; const y = s.match(/25[6-9]\d/); if (y) year = +y[0] - 543;
+  const tr = String(title).split("//")[1] || ""; // transfer date may be next year (Dec → Jan)
+  if (mon === 12 && /มกราคม/.test(tr) && y && String(title).indexOf(y[0]) > String(title).indexOf("//")) year -= 1;
+  const pad = n => String(n).padStart(2, "0");
+  return { key: `${year}-${pad(mon)}-${pad(d1)}`, d1: `${year}-${pad(mon)}-${pad(d1)}`, d2: `${year}-${pad(mon)}-${pad(Math.min(d2, 31))}`, y: year, m: mon, a: d1, b: d2 };
+}
+function parsePayWorkbook(sheets, fallbackYear) {
+  const periods = [], skipped = [];
+  for (const { name, aoa } of sheets) {
+    let hr = -1;
+    for (let r = 0; r < Math.min(8, aoa.length); r++) if ((aoa[r] || []).some(v => prClean(v) === "ชื่อเล่น")) { hr = r; break; }
+    if (hr < 0) { skipped.push(name); continue; }
+    const H = (aoa[hr] || []).map(prClean); const title = (aoa.slice(0, hr).flat().find(v => prClean(v)) || "") + "";
+    const per = prPeriod(name, title, fallbackYear); if (!per) { skipped.push(name); continue; }
+    const col = re => H.findIndex(h => re.test(h));
+    const cNick = col(/^ชื่อเล่น$/), cFull = col(/^ชื่อ-?นามสกุล/), cType = col(/^(เรตจ้าง|ตน\.)$/), cGross = col(/^ยอดรวม$/), cNet = col(/^สรุปจ่าย/);
+    if (cNet < 0 || cGross < 0) { skipped.push(name); continue; }
+    const cNotes = H.map((h, i) => /หมายเหตุ|remarks/i.test(h) ? i : -1).filter(i => i >= 0);
+    const firstCnt = H.findIndex((h, i) => i > cNick && i < cGross && /^จำนวน/.test(h));
+    const adjCols = []; for (let i = cGross + 1; i < cNet; i++) if (H[i]) adjCols.push({ i, label: H[i], plus: PR_PLUS_RE.test(H[i]) });
+    const rows = [];
+    for (let r = hr + 1; r < aoa.length; r++) {
+      const R = aoa[r] || []; const nick = prClean(R[cNick]); const net = prNum(R[cNet]);
+      if (!nick || net === null || /รวม/.test(nick)) continue;
+      const shifts = [];
+      if (firstCnt >= 0) for (let i = firstCnt; i < cGross; i++) {
+        if (/^จำนวน/.test(H[i])) { const n = prNum(R[i]), rate = prNum(R[i + 1]); if (n) shifts.push({ label: H[i + 1] || H[i], unit: H[i].replace(/^จำนวน\.?/, "") || "", n, rate: rate || 0, amt: n * (rate || 0) }); i++; }
+        else if (/^รวม$/.test(H[i])) continue;
+        else { const v = prNum(R[i]); if (v) shifts.push({ label: H[i], amt: v }); }
+      }
+      const gross = prNum(R[cGross]) || 0; const adj = [];
+      for (const a of adjCols) { const v = prNum(R[a.i]); if (v) adj.push({ label: a.label, amt: Math.abs(v), plus: v < 0 ? !a.plus : a.plus }); }
+      let plus = adj.filter(a => a.plus).reduce((s, a) => s + a.amt, 0), minus = adj.filter(a => !a.plus).reduce((s, a) => s + a.amt, 0);
+      // trust the sheet's net: if signs guessed wrong, flip the single item that fixes the gap
+      const gap = Math.round((net - (gross + plus - minus)) * 100) / 100;
+      if (gap) { const f = adj.find(a => Math.abs(Math.abs(gap) - 2 * a.amt) < 0.01 && ((gap > 0) === !a.plus)); if (f) { f.plus = !f.plus; plus = adj.filter(a => a.plus).reduce((s, a) => s + a.amt, 0); minus = adj.filter(a => !a.plus).reduce((s, a) => s + a.amt, 0); } }
+      const note = cNotes.map(i => prClean(R[i])).filter(Boolean).join(" / ");
+      rows.push({ nick, full: cFull >= 0 ? prClean(R[cFull]) : "", type: cType >= 0 ? prClean(R[cType]) : "", shifts, gross, adj, plus, minus, net, other: Math.round((net - (gross + plus - minus)) * 100) / 100, note });
+    }
+    if (rows.length) periods.push({ ...per, sheet: name, title: prClean(title), rows });
+    else skipped.push(name);
+  }
+  periods.sort((a, b) => a.key.localeCompare(b.key));
+  return { periods, skipped };
+}
+
+/* ===== Payroll report (admin only) — numbers come from the payroll Excel, not calculated here ===== */
+const PR_ALIAS = { "กระแต": "กะแต", "ปุ๊กกี้": "Pukkyy", "bam": "แบม", "จักจั่น": "จั๊กจั่น", "อุ๊งอิ๊ง": "อุ๋งอิ๋ง", "peem": "พีม", "sea": "ซี" };
 const baht = n => (Math.round(Number(n || 0) * 100) / 100).toLocaleString("th-TH", { maximumFractionDigits: 2 });
-const typeName = code => (S.pay?.cfg.types.find(t => t.code === code) || { name: code }).name;
-const typeShort = code => ({ PT: "PT", REG: "ประจำ", VIP: "ประจำ VIP" }[code] || code);
+const prStaff = nick => { const k = String(nick).trim(); const a = PR_ALIAS[k] || PR_ALIAS[k.toLowerCase()] || k; return S.staff.find(s => s.nickname.toLowerCase() === a.toLowerCase()) || null; };
+const prPill = nick => { const s = prStaff(nick); return `<span class="pill p-name" style="min-width:0;${s ? `background:${s.bg_color};color:${s.fg_color}` : "background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)"}">${esc(nick)}</span>`; };
+const prLabel = p => { const d = parseD(p.d1), e = parseD(p.d2); return `${d.d}–${e.d} ${TH_MON_S[d.m - 1]} ${d.y + 543}`; };
+const prType = t => { t = String(t || ""); if (/vip/i.test(t)) return ["VIP", "ประจำ VIP"]; if (/ประจำ/.test(t)) return ["REG", "ประจำ"]; if (/pt|part/i.test(t)) return ["PT", "PT"]; return t ? ["X", t] : null; };
+const prSum = (rows, k) => rows.reduce((a, r) => a + Number(r[k] || 0), 0);
+const prShort = s => String(s).replace(/\s*\(.*$/, "").replace(/น\.$/, "").trim();
 
-function payRange() {
-  const n = daysIn(S.y, S.m);
-  if (!S.payRange) { const t = parseD(todayStr()); S.payRange = (t.y === S.y && t.m === S.m && t.d <= 15) ? "a" : (t.y === S.y && t.m === S.m ? "b" : "a"); }
-  const [d1, d2] = S.payRange === "a" ? [1, 15] : [16, n];
-  return { d1, d2, from: ymd(S.y, S.m, d1), to: ymd(S.y, S.m, d2), title: `${d1}-${d2} ${TH_MONTHS[S.m - 1]} ${S.y + 543}` };
+async function loadPayReports() {
+  const list = await API.loadPayReports();
+  S.prep = { list: list.sort((a, b) => a.key.localeCompare(b.key)) };
+  if (!S.prKey || !S.prep.list.some(p => p.key === S.prKey)) S.prKey = S.prep.list.at(-1)?.key || null;
 }
 
-async function loadPay() {
-  const r = payRange(); const key = `${r.from}|${r.to}`;
-  const [rows, lv, p] = await Promise.all([API.loadRange(ymd(S.y, S.m, 1), r.to), API.loadLeaves(r.from, r.to), API.loadPay(r.from)]);
-  const cfgRow = (p.config || []).find(c => c.key === "rates");
-  const cfg = JSON.parse(JSON.stringify(PAY_DEFAULT));
-  if (cfgRow) { const v = cfgRow.value; if (v.types) cfg.types = v.types; for (const t of Object.keys(v.rates || {})) cfg.rates[t] = { ...(cfg.rates[t] || {}), ...v.rates[t] }; Object.assign(cfg.unit, v.unit || {}); Object.assign(cfg.bonus, v.bonus || {}); }
-  S.pay = { key, r, cfg, rows, leaves: lv.filter(l => l.status === "approved"), staff: new Map((p.staff || []).map(x => [x.id, x])), items: p.items || [], opts: new Map((p.opts || []).map(o => [o.id, o])) };
-  S.pay.calc = computePay();
-}
-
-function payCodeOf(slot) {
-  const sh = shiftById(slot.shift_id); const ch = chanById(sh.channel_id); const lb = String(sh.label).replace(/\s/g, "");
-  const sup = ch.code === "support"; const sun = parseD(slot.work_date).wd === 0;
-  let c = null;
-  if (sup || lb === "23.00-08.00") c = { "08.00-17.00": "S0817", "23.00-08.00": "S2308" }[lb] || null;
-  else c = { "05.00-08.00": "L0508", "05.00-17.00": "L0517", "08.00-17.00": "L0817", "17.00-05.00": "L1705" }[lb] || null;
-  if (c && c.startsWith("S") && sun) c += "SUN";
-  return { code: c, sh, ch };
-}
-
-function computePay() {
-  const P = S.pay; const { from, to } = P.r; const out = new Map();
-  const get = id => { if (!out.has(id)) { const ps = P.staff.get(id) || {}; out.set(id, { id, st: staffById(id), ps, type: ps.rate_type || "PT", entries: [], items: [], counts: {}, base: 0, plus: 0, minus: 0, net: 0, sugg: [], monthDays: 0, pending: 0 }); } return out.get(id); };
-  const monthDays = {};
-  for (const s of P.rows) {
-    if (!s.staff_id) continue;
-    if (s.status === "approved") (monthDays[s.staff_id] ||= new Set()).add(s.work_date);
-    if (s.work_date < from || s.work_date > to) continue;
-    if (s.status === "pending") { get(s.staff_id).pending++; continue; }
-    if (s.status !== "approved") continue;
-    const p = get(s.staff_id); const { code, sh, ch } = payCodeOf(s); const o = P.opts.get(s.id); const opt = o && (!o.staff_id || o.staff_id === s.staff_id) ? o.opt : null;
-    let c = code; if (c === "L1705" && opt === "break") c = "L1705B";
-    p.entries.push({ date: s.work_date, slots: [s], sh, ch, code: c, raw: code, opt, nopay: opt === "nopay" });
-  }
-  for (const it of P.items) get(it.staff_id).items.push(it);
-  for (const p of out.values()) {
-    // 05-08 + 08-17 (live) on the same day = 05-17 (3 กะ)
-    const byDay = {}; p.entries.forEach(e => (byDay[e.date] ||= []).push(e));
-    const merged = [];
-    for (const [d, list] of Object.entries(byDay)) {
-      const a = list.filter(e => e.code === "L0508" && !e.nopay), b = list.filter(e => e.code === "L0817" && !e.nopay);
-      while (a.length && b.length) { const x = a.shift(), y = b.shift(); x._m = y._m = true; merged.push({ date: d, slots: [...x.slots, ...y.slots], sh: x.sh, ch: x.ch, code: "L0517", merged: [x, y] }); }
-    }
-    p.entries = [...p.entries.filter(e => !e._m), ...merged].sort((x, y) => x.date.localeCompare(y.date) || shiftById(x.slots[0].shift_id).sort_order - shiftById(y.slots[0].shift_id).sort_order);
-    const rates = P.cfg.rates[p.type] || P.cfg.rates.PT || {};
-    for (const e of p.entries) {
-      e.rate = e.code ? Number(rates[e.code] || 0) : 0; e.amt = e.nopay ? 0 : e.rate;
-      if (!e.code) p.unknown = (p.unknown || 0) + 1;
-      if (!e.nopay && e.code) p.counts[e.code] = (p.counts[e.code] || 0) + 1;
-      p.base += e.amt;
-    }
-    for (const it of p.items) { const k = PAY_KINDS[it.kind]; if (!k) continue; if (k.s > 0) p.plus += Number(it.amount); else p.minus += Number(it.amount); }
-    p.net = p.base + p.plus - p.minus;
-    p.monthDays = (monthDays[p.id] || new Set()).size;
-    // suggestions
-    const has = k => p.items.filter(i => i.kind === k).length; const U = P.cfg.unit;
-    const lvs = P.leaves.filter(l => l.staff_id === p.id);
-    const sud = lvs.filter(l => l.leave_type === "sudden"); const sick = lvs.filter(l => l.leave_type === "sick");
-    if (sud.length > has("sudden")) p.sugg.push({ kind: "sudden", qty: sud.length - has("sudden"), amount: (sud.length - has("sudden")) * U.sudden, why: `ลากะทันหัน ${sud.length} ครั้งในรอบนี้ (${sud.map(l => shortDate(l.work_date)).join(", ")})` });
-    if (sick.length > has("medcert")) p.sugg.push({ kind: "medcert", qty: sick.length - has("medcert"), amount: (sick.length - has("medcert")) * U.medcert, why: `ลาป่วย ${sick.length} ครั้ง — เพิ่มเฉพาะถ้าไม่ส่งใบรับรองแพทย์` });
-    if (S.payRange === "b" && P.cfg.bonus.amount > 0 && p.monthDays >= P.cfg.bonus.days && !has("bonus")) p.sugg.push({ kind: "bonus", qty: null, amount: P.cfg.bonus.amount, why: `ทำงาน ${p.monthDays} วันในเดือนนี้ (ครบ ${P.cfg.bonus.days} วัน)` });
-    if (Number(p.ps.sso) > 0 && !has("sso")) p.sugg.push({ kind: "sso", qty: null, amount: Number(p.ps.sso), why: "ตามที่ตั้งไว้ในข้อมูลพนักงาน" });
-  }
-  const ord = { VIP: 0, REG: 1, PT: 2 };
-  return [...out.values()].filter(p => p.st && (p.entries.length || p.items.length || p.pending))
-    .sort((a, b) => (ord[a.type] ?? 3) - (ord[b.type] ?? 3) || a.st.nickname.localeCompare(b.st.nickname, "th"));
-}
-
-function payChips(p) {
-  return PAY_COLS.filter(([k]) => p.counts[k]).map(([k]) => `<span class="pchip">${PAY_COL[k].s} <b>×${p.counts[k]}</b></span>`).join("");
+function prBars(items, selKey, onKey) {
+  // items: [{key,label,value}] — simple column chart, selected one highlighted
+  const max = Math.max(1, ...items.map(i => i.value));
+  return `<div class="prbars" role="list">${items.map(i => `<button class="prbar ${i.key === selKey ? "on" : ""}" ${onKey ? `data-${onKey}="${esc(i.key)}"` : ""} role="listitem" title="${esc(i.label)} · ฿${baht(i.value)}">
+    <span class="v tnum">${i.value >= 1000 ? Math.round(i.value / 1000) + "k" : baht(i.value)}</span><span class="b" style="height:${Math.max(3, Math.round(i.value / max * 100))}%"></span><span class="l">${esc(i.short)}</span></button>`).join("")}</div>`;
 }
 
 function renderPay(body) {
-  const r = payRange(); const key = `${r.from}|${r.to}`; const n = daysIn(S.y, S.m);
-  const seg = `<div class="seg"><button data-pr="a" class="${S.payRange === "a" ? "on" : ""}">1–15</button><button data-pr="b" class="${S.payRange === "b" ? "on" : ""}">16–${n}</button></div>`;
-  const bind = () => body.querySelectorAll("[data-pr]").forEach(b => b.onclick = () => { S.payRange = b.dataset.pr; render(); });
-  if (!S.pay || S.pay.key !== key) {
-    body.innerHTML = `<div class="panel"><div class="panel-h"><h3>คิดเงินพนักงาน</h3><span class="sub">${r.title}</span><div class="spacer"></div>${seg}</div><div class="empty"><div class="loader" style="margin:0 auto 10px"></div>กำลังคำนวณ…</div></div>`; bind();
-    if (S._payLoading !== key) { S._payLoading = key; loadPay().then(() => { S._payLoading = null; if (S.tab === "pay") render(); }).catch(e => { S._payLoading = null; toast("โหลดข้อมูลเงินเดือนไม่สำเร็จ: " + e.message, "err"); }); }
+  if (!S.prep) {
+    body.innerHTML = `<div class="panel"><div class="empty"><div class="loader" style="margin:0 auto 10px"></div>กำลังโหลดรายงาน…</div></div>`;
+    if (!S._prLoading) { S._prLoading = true; loadPayReports().then(() => { S._prLoading = false; if (S.tab === "pay") render(); }).catch(e => { S._prLoading = false; S.prep = { list: [], err: e.message }; if (S.tab === "pay") render(); }); }
     return;
   }
-  const L = S.pay.calc; const tot = L.reduce((a, p) => a + p.net, 0); const shifts = L.reduce((a, p) => a + p.entries.filter(e => !e.nopay).reduce((x, e) => x + e.slots.length, 0), 0);
-  const pend = L.reduce((a, p) => a + p.pending, 0); const unk = L.reduce((a, p) => a + (p.unknown || 0), 0); const sug = L.reduce((a, p) => a + p.sugg.length, 0);
-  body.innerHTML = `<div class="panel"><div class="panel-h"><h3>คิดเงินพนักงาน</h3><span class="sub">${r.title}</span><div class="spacer"></div>${seg}</div>
-    <div class="pstats"><div><span>ยอดจ่ายรวม</span><b class="tnum">฿${baht(tot)}</b></div><div><span>พนักงาน</span><b class="tnum">${L.length}</b></div><div><span>กะที่อนุมัติ</span><b class="tnum">${shifts}</b></div></div>
-    <div class="payact"><button class="btn pri" id="payX">⬇ Excel ใบเงินเดือน</button><button class="btn" id="payRates">ตั้งค่าเรต</button><button class="btn" id="payRe">↻ คำนวณใหม่</button></div>
-    ${pend || unk || sug ? `<div class="paywarn">${pend ? `<div>• มี <b>${pend}</b> กะยังรออนุมัติ — ยังไม่นับเงิน</div>` : ""}${unk ? `<div>• มี <b>${unk}</b> กะที่ไม่รู้จักเรต (คิด 0 บาท) — ดูในรายคน</div>` : ""}${sug ? `<div>• มี <b>${sug}</b> รายการแนะนำ (ค่าปรับลา / เบี้ยขยัน) รอตรวจ — ดูจุดสีส้มในรายคน</div>` : ""}</div>` : ""}
-    <div class="note" style="padding:0 16px 14px;margin:0">คิดจากกะที่ <b>อนุมัติแล้ว</b> ในตาราง (กะที่ลาและอนุมัติลาแล้วจะหลุดออกเอง) · 05-08 + 08-17 วันเดียวกัน = นับเป็น 05-17 · 17-05 คิด "ไม่พัก" เว้นแต่ติ๊ก "พัก" ในรายคน</div></div>
-  <div class="panel"><div class="panel-h"><h3>รายคน</h3><span class="sub">กดที่ชื่อเพื่อดูกะ ใส่ค่าปรับ/เบี้ยขยัน/ค่า TikTok</span></div>
-    ${L.map(p => `<button class="payrow" data-pp="${p.id}">
-      <span class="pr-l"><span class="pill p-name" style="min-width:0;background:${p.st.bg_color};color:${p.st.fg_color}">${esc(p.st.nickname)}</span><span class="ptype t-${esc(p.type)}">${esc(typeShort(p.type))}</span>${p.sugg.length ? `<span class="sdot" title="มีรายการแนะนำ">${p.sugg.length}</span>` : ""}</span>
-      <span class="pr-m">${payChips(p) || `<span class="pchip">ไม่มีกะ</span>`}${p.pending ? `<span class="pchip pend">รออนุมัติ ${p.pending}</span>` : ""}</span>
-      <span class="pr-r"><b class="tnum">฿${baht(p.net)}</b><small class="tnum">กะ ${baht(p.base)}${p.plus ? ` · <span class="plus">+${baht(p.plus)}</span>` : ""}${p.minus ? ` · <span class="minus">−${baht(p.minus)}</span>` : ""}</small></span>
-    </button>`).join("") || `<div class="empty">ยังไม่มีกะที่อนุมัติในรอบนี้</div>`}
-    ${L.length ? `<div class="paytot"><span>รวมทั้งหมด</span><b class="tnum">฿${baht(tot)}</b></div>` : ""}</div>`;
-  bind();
-  body.querySelectorAll("[data-pp]").forEach(b => b.onclick = () => openPayPerson(b.dataset.pp));
-  $("#payX").onclick = exportPaySlip; $("#payRates").onclick = openPayRates;
-  $("#payRe").onclick = async () => { S.pay = null; render(); };
+  const L = S.prep.list; const view = S.prView || "period";
+  const up = `<button class="btn" id="prUp">⬆ อัปโหลดไฟล์ Excel</button><input type="file" id="prFile" accept=".xlsx,.xls" class="hidden">`;
+  if (!L.length) {
+    body.innerHTML = `<div class="panel"><div class="panel-h"><h3>Payroll</h3><span class="sub">รายงานเงินเดือนจากไฟล์ Excel</span></div>
+      <div class="empty" style="padding:36px 16px">${S.prep.err ? `<p style="color:var(--danger)">${esc(S.prep.err)}</p>` : ""}ยังไม่มีข้อมูล — อัปโหลดไฟล์ Excel เงินเดือน (ไฟล์ที่มีแผ่นงาน 1-15 / 16-31 ของแต่ละเดือน)<div style="margin-top:14px">${up.replace('class="btn"', 'class="btn pri"')}</div></div></div>`;
+    prBindUpload(); return;
+  }
+  const seg = `<div class="seg"><button data-pv="period" class="${view === "period" ? "on" : ""}">รายรอบ</button><button data-pv="year" class="${view === "year" ? "on" : ""}">ทั้งปี</button></div>`;
+  const head = sub => `<div class="panel-h"><h3>Payroll</h3><span class="sub">${sub}</span><div class="spacer"></div>${seg}</div>`;
+  if (view === "year") body.innerHTML = prYearHtml(L, head); else body.innerHTML = prPeriodHtml(L, head, up);
+  body.querySelectorAll("[data-pv]").forEach(b => b.onclick = () => { S.prView = b.dataset.pv; render(); });
+  body.querySelectorAll("[data-pk]").forEach(b => b.onclick = () => { S.prKey = b.dataset.pk; S.prView = "period"; render(); });
+  body.querySelectorAll("[data-py]").forEach(b => b.onclick = () => { S.prYear = +b.dataset.py; render(); });
+  body.querySelectorAll("[data-pp]").forEach(b => b.onclick = () => openPrPerson(b.dataset.pp));
+  const sel = $("#prSel"); if (sel) sel.onchange = () => { S.prKey = sel.value; render(); };
+  body.querySelectorAll(".prbars").forEach(el => { const on = el.querySelector(".prbar.on"); el.scrollLeft = on ? on.offsetLeft - el.clientWidth / 2 : el.scrollWidth; });
+  prBindUpload();
 }
 
-async function payAction(fn, okMsg, reopen) {
-  try { await fn(); await loadPay(); if (okMsg) toast(okMsg, "ok"); if (S.tab === "pay") render(); if (reopen) reopen(); }
-  catch (e) { toast(e.message, "err"); }
+function prPeriodHtml(L, head, up) {
+  const i = L.findIndex(p => p.key === S.prKey); const P = L[i]; const prev = L[i - 1];
+  const R = [...P.rows].sort((a, b) => b.net - a.net);
+  const net = prSum(R, "net"), gross = prSum(R, "gross"), plus = prSum(R, "plus"), minus = prSum(R, "minus");
+  const pNet = prev ? prSum(prev.rows, "net") : null; const ch = pNet ? (net - pNet) / pNet * 100 : null;
+  const adj = {}; R.forEach(r => r.adj.forEach(a => { const k = (a.plus ? "+" : "−") + a.label; (adj[k] ||= { label: a.label, plus: a.plus, amt: 0, n: 0 }); adj[k].amt += a.amt; adj[k].n++; }));
+  const adjL = Object.values(adj).sort((a, b) => (b.plus - a.plus) || b.amt - a.amt);
+  const sh = {}; R.forEach(r => r.shifts.forEach(s => { const k = prShort(s.label); (sh[k] ||= { label: k, n: 0, amt: 0 }); sh[k].n += s.n || 0; sh[k].amt += s.amt || 0; }));
+  const shL = Object.values(sh).filter(s => s.amt).sort((a, b) => b.amt - a.amt);
+  const maxNet = Math.max(1, ...R.map(r => r.net));
+  const bars = L.slice(-12).map(p => ({ key: p.key, label: prLabel(p), short: `${parseD(p.d1).d === 1 ? "1" : "16"} ${TH_MON_S[parseD(p.d1).m - 1]}`, value: prSum(p.rows, "net") }));
+  const off = R.filter(r => r.other);
+  return `<div class="panel">${head(esc(P.title || prLabel(P)))}
+    <div class="prtool"><select id="prSel" aria-label="เลือกรอบ">${[...L].reverse().map(p => `<option value="${esc(p.key)}" ${p.key === P.key ? "selected" : ""}>รอบ ${prLabel(p)}</option>`).join("")}</select>${up}</div>
+    <div class="pstats prs"><div><span>จ่ายสุทธิรอบนี้</span><b class="tnum">฿${baht(net)}</b>${ch === null ? "" : `<em class="${ch >= 0 ? "up" : "down"}">${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% จากรอบก่อน</em>`}</div>
+      <div><span>ค่ากะรวม</span><b class="tnum">฿${baht(gross)}</b></div><div><span>บวก / หัก</span><b class="tnum"><span class="plus">${plus ? "+" + baht(plus) : "+0"}</span> <span class="minus">${minus ? "−" + baht(minus) : "หัก 0"}</span></b></div><div><span>พนักงาน</span><b class="tnum">${R.length}</b></div></div>
+    <div class="prchart"><div class="prch-h">ยอดจ่ายสุทธิ ${bars.length} รอบล่าสุด <small>กดแท่งเพื่อเปลี่ยนรอบ</small></div>${prBars(bars, P.key, "pk")}</div>
+    ${off.length ? `<div class="paywarn">• ${off.length} คนยอดในไฟล์ไม่ตรงกับ ค่ากะ + บวก − หัก (${off.map(r => `${esc(r.nick)} ${r.other > 0 ? "+" : ""}${baht(r.other)}`).join(", ")}) — รายงานใช้ยอด "สรุปจ่ายค่าจ้าง" ตามไฟล์</div>` : ""}
+  </div>
+  <div class="panel"><div class="panel-h"><h3>รายคน</h3><span class="sub">เรียงตามยอดจ่าย · กดชื่อดูรายละเอียด</span></div>
+    <div class="prtbl"><div class="prtr prth"><span>พนักงาน</span><span>ค่ากะ</span><span>บวก</span><span>หัก</span><span>สุทธิ</span></div>
+    ${R.map(r => { const t = prType(r.type); return `<button class="prtr" data-pp="${esc(r.nick)}">
+      <span class="prn">${prPill(r.nick)}${t ? `<span class="ptype t-${t[0]}">${esc(t[1])}</span>` : ""}<i class="prshare"><i style="width:${(r.net / maxNet * 100).toFixed(1)}%"></i></i></span>
+      <span class="tnum" data-l="ค่ากะ">${baht(r.gross)}</span><span class="tnum plus" data-l="บวก">${r.plus ? "+" + baht(r.plus) : "–"}</span><span class="tnum minus" data-l="หัก">${r.minus ? "−" + baht(r.minus) : "–"}</span><span class="tnum net" data-l="สุทธิ">฿${baht(r.net)}</span></button>`; }).join("")}
+    <div class="prtr prtot"><span>รวม ${R.length} คน</span><span class="tnum" data-l="ค่ากะ">${baht(gross)}</span><span class="tnum plus" data-l="บวก">${plus ? "+" + baht(plus) : "–"}</span><span class="tnum minus" data-l="หัก">${minus ? "−" + baht(minus) : "–"}</span><span class="tnum net" data-l="สุทธิ">฿${baht(net)}</span></div></div></div>
+  <div class="prgrid">
+    <div class="panel"><div class="panel-h"><h3>ค่ากะแยกตามกะ</h3></div>${shL.length ? shL.map(s => `<div class="prline"><span>${esc(s.label)}</span><small class="tnum">${baht(s.n)} ครั้ง</small><b class="tnum">฿${baht(s.amt)}</b><i class="prshare wide"><i style="width:${(s.amt / Math.max(1, gross) * 100).toFixed(1)}%"></i></i></div>`).join("") : `<div class="empty">ไฟล์รอบนี้ไม่มีรายละเอียดกะ</div>`}</div>
+    <div class="panel"><div class="panel-h"><h3>รายการบวก / หัก</h3></div>${adjL.length ? adjL.map(a => `<div class="prline"><span>${esc(a.label)}</span><small class="tnum">${a.n} คน</small><b class="tnum ${a.plus ? "plus" : "minus"}">${a.plus ? "+" : "−"}${baht(a.amt)}</b></div>`).join("") : `<div class="empty">ไม่มีรายการบวก/หักในรอบนี้</div>`}</div>
+  </div>
+  <p class="note" style="margin:10px 2px">ข้อมูลจากแผ่นงาน "${esc(P.sheet || "")}" · อัปเดต ${P.updated_at ? new Date(P.updated_at).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }) : "-"}</p>`;
 }
 
-function openPayPerson(id) {
-  const p = S.pay.calc.find(x => x.id === id) || (() => { S.pay.calc = computePay(); return S.pay.calc.find(x => x.id === id); })();
-  if (!p) return closeSheet();
-  const U = S.pay.cfg.unit; const reopen = () => openPayPerson(id);
-  const kindOpts = k => `<option value="${k}">${PAY_KINDS[k].s > 0 ? "+ " : "− "}${PAY_KINDS[k].t}${PAY_KINDS[k].u ? ` (${baht(U[PAY_KINDS[k].u])}/${PAY_KINDS[k].q})` : ""}</option>`;
-  const entryRow = e => {
-    const d = parseD(e.date); const nm = e.code ? PAY_COL[e.code].t : `ไม่รู้จักเรต (${esc(e.sh.label)})`;
-    const where = e.merged ? e.merged.map(m => `${esc(m.ch.name)} ${m.sh.label}`).join(" + ") : `${esc(e.ch.name)} ${e.sh.label}`;
-    const one = !e.merged ? e.slots[0] : null;
-    return `<div class="pe ${e.nopay ? "off" : ""}"><div class="pe-d"><span style="color:${WD_COLOR[d.wd]}">${WD_S[d.wd]}</span> <b class="tnum">${d.d}</b></div>
-      <div class="pe-w"><div>${nm}${e.merged ? ` <span class="mtag">รวมกะ</span>` : ""}</div><small>${where}</small>
-      ${one ? `<div class="pe-o">${(e.raw === "L1705") ? `<label><input type="checkbox" data-brk="${one.id}" ${e.opt === "break" ? "checked" : ""}> พัก 1 ชม.</label>` : ""}<label><input type="checkbox" data-nop="${one.id}" ${e.nopay ? "checked" : ""}> ไม่จ่าย (ไม่ได้มาทำ)</label></div>`
-        : `<div class="pe-o">${e.merged.map(m => `<label><input type="checkbox" data-nop="${m.slots[0].id}"> ไม่ได้มา ${m.sh.label}</label>`).join("")}</div>`}</div>
-      <div class="pe-a tnum">${e.nopay ? "0" : baht(e.amt)}</div></div>`;
-  };
+function prYearHtml(L, head) {
+  const years = [...new Set(L.map(p => parseD(p.d1).y))].sort(); if (!years.includes(S.prYear)) S.prYear = years.at(-1);
+  const Y = L.filter(p => parseD(p.d1).y === S.prYear);
+  const months = {}; Y.forEach(p => { const m = parseD(p.d1).m; months[m] = (months[m] || 0) + prSum(p.rows, "net"); });
+  const bars = Object.keys(months).map(Number).sort((a, b) => a - b).map(m => ({ key: String(m), label: `${TH_MONTHS[m - 1]}`, short: TH_MON_S[m - 1], value: months[m] }));
+  const ppl = {}; Y.forEach(p => p.rows.forEach(r => { const s = prStaff(r.nick); const k = s ? s.nickname : String(r.nick).trim().toLowerCase(); (ppl[k] ||= { nick: r.nick, net: 0, gross: 0, plus: 0, minus: 0, n: 0, type: r.type }); const x = ppl[k]; x.net += r.net; x.gross += r.gross; x.plus += r.plus; x.minus += r.minus; x.n++; x.type = r.type || x.type; x.nick = r.nick; }));
+  const P = Object.values(ppl).sort((a, b) => b.net - a.net); const tot = prSum(P, "net"); const maxNet = Math.max(1, ...P.map(r => r.net));
+  const avg = bars.length ? tot / bars.length : 0;
+  return `<div class="panel">${head(`ปี ${S.prYear + 543} · ${Y.length} รอบ`)}
+    ${years.length > 1 ? `<div class="prtool">${years.map(y => `<button class="btn sm ${y === S.prYear ? "pri" : ""}" data-py="${y}">${y + 543}</button>`).join("")}</div>` : ""}
+    <div class="pstats prs"><div><span>จ่ายสุทธิทั้งปี</span><b class="tnum">฿${baht(tot)}</b></div><div><span>เฉลี่ยต่อเดือน</span><b class="tnum">฿${baht(avg)}</b></div><div><span>บวก / หัก ทั้งปี</span><b class="tnum"><span class="plus">+${baht(prSum(P, "plus"))}</span> <span class="minus">−${baht(prSum(P, "minus"))}</span></b></div><div><span>พนักงานที่เคยรับเงิน</span><b class="tnum">${P.length}</b></div></div>
+    <div class="prchart"><div class="prch-h">ยอดจ่ายสุทธิรายเดือน</div>${prBars(bars, null, null)}</div></div>
+  <div class="panel"><div class="panel-h"><h3>รายคน ทั้งปี</h3><span class="sub">รวมทุกรอบในปี · กดชื่อดูประวัติ</span></div>
+    <div class="prtbl"><div class="prtr prth"><span>พนักงาน</span><span>รอบที่ได้รับ</span><span>บวก</span><span>หัก</span><span>สุทธิรวม</span></div>
+    ${P.map(r => { const t = prType(r.type); return `<button class="prtr" data-pp="${esc(r.nick)}"><span class="prn">${prPill(r.nick)}${t ? `<span class="ptype t-${t[0]}">${esc(t[1])}</span>` : ""}<i class="prshare"><i style="width:${(r.net / maxNet * 100).toFixed(1)}%"></i></i></span>
+      <span class="tnum" data-l="รอบ">${r.n} รอบ</span><span class="tnum plus" data-l="บวก">${r.plus ? "+" + baht(r.plus) : "–"}</span><span class="tnum minus" data-l="หัก">${r.minus ? "−" + baht(r.minus) : "–"}</span><span class="tnum net" data-l="สุทธิ">฿${baht(r.net)}</span></button>`; }).join("")}
+    <div class="prtr prtot"><span>รวม ${P.length} คน</span><span></span><span></span><span></span><span class="tnum net" data-l="สุทธิ">฿${baht(tot)}</span></div></div></div>`;
+}
+
+function openPrPerson(nick) {
+  const L = S.prep.list; const st = prStaff(nick); const same = r => { const s = prStaff(r.nick); return st ? s === st : r.nick === nick; };
+  const hist = L.map(p => ({ p, r: p.rows.find(same) })).filter(x => x.r);
+  const cur = hist.find(x => x.p.key === S.prKey) || hist.at(-1); if (!cur) return;
+  const r = cur.r; const t = prType(r.type);
+  const bars = hist.slice(-12).map(x => ({ key: x.p.key, label: prLabel(x.p), short: `${parseD(x.p.d1).d === 1 ? "1" : "16"} ${TH_MON_S[parseD(x.p.d1).m - 1]}`, value: x.r.net }));
   openSheet(`<div class="paysheet">
-    <div class="ps-h"><span class="pill p-name" style="min-width:0;background:${p.st.bg_color};color:${p.st.fg_color}">${esc(p.st.nickname)}</span><div><h3 style="margin:0">${esc(p.ps.full_name || p.st.nickname)}</h3><small>${S.pay.r.title}${p.ps.bank ? ` · ${esc(p.ps.bank)} ${esc(p.ps.account_no || "")}` : ""}</small></div></div>
-    <label class="field" style="margin:12px 0 10px">เรตจ้าง<select id="ppType">${S.pay.cfg.types.map(t => `<option value="${esc(t.code)}" ${t.code === p.type ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>
-    <div class="ps-sum"><div><span>ค่ากะ</span><b class="tnum">${baht(p.base)}</b></div><div><span>บวก</span><b class="tnum plus">+${baht(p.plus)}</b></div><div><span>หัก</span><b class="tnum minus">−${baht(p.minus)}</b></div><div class="net"><span>สุทธิ</span><b class="tnum">฿${baht(p.net)}</b></div></div>
-    ${p.sugg.length ? `<div class="ps-sec"><h4>แนะนำให้เพิ่ม</h4>${p.sugg.map((g, i) => `<div class="sug"><div><b>${PAY_KINDS[g.kind].s > 0 ? "+" : "−"}${baht(g.amount)} ${PAY_KINDS[g.kind].t}</b><small>${esc(g.why)}</small></div><button class="btn sm go" data-sg="${i}">เพิ่ม</button></div>`).join("")}</div>` : ""}
-    <div class="ps-sec"><h4>รายการบวก / หัก</h4>
-      ${p.items.map(it => `<div class="itm"><span class="${PAY_KINDS[it.kind]?.s > 0 ? "plus" : "minus"} tnum">${PAY_KINDS[it.kind]?.s > 0 ? "+" : "−"}${baht(it.amount)}</span><span class="itm-t">${esc(PAY_KINDS[it.kind]?.t || it.kind)}${it.qty ? ` · ${baht(it.qty)} ${PAY_KINDS[it.kind]?.q || ""}` : ""}${it.note ? `<small>${esc(it.note)}</small>` : ""}</span><button class="icon-x" data-di="${it.id}" aria-label="ลบ">✕</button></div>`).join("") || `<div class="note" style="margin:0 0 8px">ยังไม่มีรายการ</div>`}
-      <div class="addit">
-        <select id="aiK">${`<optgroup label="รายการบวก">${PAY_PLUS.map(kindOpts).join("")}</optgroup><optgroup label="รายการหัก / ค่าปรับ">${PAY_MINUS.map(kindOpts).join("")}</optgroup>`}</select>
-        <div class="addit-r"><label id="aiQw" class="hidden"><span id="aiQl">จำนวน</span><input type="number" id="aiQ" min="0" step="1" inputmode="numeric"></label><label><span>บาท</span><input type="number" id="aiA" min="0" step="1" inputmode="decimal"></label></div>
-        <input type="text" id="aiN" placeholder="หมายเหตุ (ไม่บังคับ) เช่น วันที่ / เหตุผล">
-        <button class="btn pri" id="aiGo">+ เพิ่มรายการ</button>
-      </div></div>
-    <div class="ps-sec"><h4>กะที่ทำ (${p.entries.length} รายการ)</h4>${p.entries.map(entryRow).join("") || `<div class="note" style="margin:0">ไม่มีกะที่อนุมัติ</div>`}</div>
-    <div class="btns" style="margin-top:14px"><button class="btn" id="ppInfo">ข้อมูลบัญชี</button><button class="btn pri" data-close>ปิด</button></div></div>`, "wide");
-  const kSel = $("#aiK"), qW = $("#aiQw"), qI = $("#aiQ"), aI = $("#aiA");
-  const syncK = () => { const k = PAY_KINDS[kSel.value]; qW.classList.toggle("hidden", !k.u); $("#aiQl").textContent = k.q || "จำนวน"; if (k.u) { qI.value = qI.value || 1; aI.value = Number(qI.value) * U[k.u]; } else if (kSel.value === "bonus") aI.value = S.pay.cfg.bonus.amount; else if (kSel.value === "sso") aI.value = Number(p.ps.sso) || ""; else aI.value = ""; };
-  kSel.onchange = () => { qI.value = ""; syncK(); }; qI.oninput = () => { const k = PAY_KINDS[kSel.value]; if (k.u) aI.value = Number(qI.value || 0) * U[k.u]; };
-  syncK();
-  const pStart = S.pay.r.from;
-  $("#aiGo").onclick = () => { const amt = Number(aI.value); if (!(amt > 0)) return toast("ใส่จำนวนเงินก่อน", "err"); const k = PAY_KINDS[kSel.value];
-    payAction(() => API.rpc("admin_pay_add_item", { p_staff_id: id, p_period_start: pStart, p_kind: kSel.value, p_amount: amt, p_qty: k.u ? Number(qI.value) || null : null, p_note: $("#aiN").value }), "เพิ่มรายการแล้ว", reopen); };
-  document.querySelectorAll("[data-sg]").forEach(b => b.onclick = () => { const g = p.sugg[+b.dataset.sg]; b.disabled = true;
-    payAction(() => API.rpc("admin_pay_add_item", { p_staff_id: id, p_period_start: pStart, p_kind: g.kind, p_amount: g.amount, p_qty: g.qty, p_note: g.why }), "เพิ่มรายการแล้ว", reopen); });
-  document.querySelectorAll("[data-di]").forEach(b => b.onclick = () => { b.disabled = true; payAction(() => API.rpc("admin_pay_delete_item", { p_id: +b.dataset.di }), "ลบรายการแล้ว", reopen); });
-  document.querySelectorAll("[data-brk]").forEach(b => b.onchange = () => payAction(() => API.rpc("admin_pay_set_slot_opt", { p_slot_id: +b.dataset.brk, p_opt: b.checked ? "break" : null }), null, reopen));
-  document.querySelectorAll("[data-nop]").forEach(b => b.onchange = () => payAction(() => API.rpc("admin_pay_set_slot_opt", { p_slot_id: +b.dataset.nop, p_opt: b.checked ? "nopay" : null }), null, reopen));
-  $("#ppType").onchange = () => { const ps = p.ps; payAction(() => API.rpc("admin_pay_save_staff", { p_id: id, p_rate_type: $("#ppType").value, p_full_name: ps.full_name || null, p_bank: ps.bank || null, p_account_no: ps.account_no || null, p_phone: ps.phone || null, p_start_date: ps.start_date || null, p_sso: Number(ps.sso) || 0, p_note: ps.note || null }), "เปลี่ยนเรตแล้ว", reopen); };
-  $("#ppInfo").onclick = () => openPayInfo(id, reopen);
+    <div class="ps-h">${prPill(r.nick)}<div><h3 style="margin:0">${esc(r.full || r.nick)}</h3><small>รอบ ${prLabel(cur.p)}${t ? ` · ${esc(t[1])}` : ""}</small></div></div>
+    <div class="ps-sum" style="margin-top:12px"><div><span>ค่ากะ</span><b class="tnum">${baht(r.gross)}</b></div><div><span>บวก</span><b class="tnum plus">${r.plus ? "+" + baht(r.plus) : "0"}</b></div><div><span>หัก</span><b class="tnum minus">${r.minus ? "−" + baht(r.minus) : "0"}</b></div><div class="net"><span>สุทธิ</span><b class="tnum">฿${baht(r.net)}</b></div></div>
+    <div class="ps-sec"><h4>ค่ากะ</h4>${r.shifts.length ? r.shifts.map(s => `<div class="itm"><span class="itm-t">${esc(s.label)}${s.n ? `<small class="tnum">${baht(s.n)} ${esc(s.unit || "")} × ${baht(s.rate)}</small>` : ""}</span><b class="tnum">${baht(s.amt)}</b></div>`).join("") : `<div class="itm"><span class="itm-t">ยอดรวมค่ากะ<small>ไฟล์รอบนี้ไม่ได้แยกจำนวนกะของคนนี้</small></span><b class="tnum">${baht(r.gross)}</b></div>`}</div>
+    ${r.adj.length ? `<div class="ps-sec"><h4>รายการบวก / หัก</h4>${r.adj.map(a => `<div class="itm"><span class="itm-t">${esc(a.label)}</span><b class="tnum ${a.plus ? "plus" : "minus"}">${a.plus ? "+" : "−"}${baht(a.amt)}</b></div>`).join("")}</div>` : ""}
+    ${r.note ? `<div class="ps-sec"><h4>หมายเหตุ</h4><div class="note" style="margin:0;white-space:pre-wrap">${esc(r.note)}</div></div>` : ""}
+    <div class="ps-sec"><h4>ประวัติรายรอบ · รวม ฿${baht(hist.reduce((a, x) => a + x.r.net, 0))} (${hist.length} รอบ)</h4>${prBars(bars, cur.p.key, "hk")}</div>
+    <div class="btns" style="margin-top:14px"><button class="btn pri" data-close>ปิด</button></div></div>`, "wide");
+  document.querySelectorAll(".sheet .prbars").forEach(el => { const on = el.querySelector(".prbar.on"); el.scrollLeft = on ? on.offsetLeft - el.clientWidth / 2 : el.scrollWidth; });
+  document.querySelectorAll("[data-hk]").forEach(b => b.onclick = () => { S.prKey = b.dataset.hk; S.prView = "period"; render(); openPrPerson(nick); });
 }
 
-function openPayInfo(id, back) {
-  const st = staffById(id); const ps = S.pay.staff.get(id) || { rate_type: "PT" };
-  const inp = (k, lbl, v, type = "text", ph = "") => `<label class="field">${lbl}<input type="${type}" id="pi_${k}" value="${esc(v ?? "")}" placeholder="${esc(ph)}" ${type === "date" ? 'style="border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 10px"' : ""}></label>`;
-  openSheet(`<h3>ข้อมูลบัญชี · ${esc(st.nickname)}</h3><p class="lead">ใช้ในไฟล์ Excel ใบเงินเดือน · เห็นเฉพาะแอดมิน</p>
-    ${inp("fn", "ชื่อ-นามสกุล", ps.full_name)}
-    <div style="display:flex;gap:10px">${inp("bk", "ธนาคาร", ps.bank, "text", "กสิกรไทย")}${inp("ac", "เลขบัญชี", ps.account_no, "text", "xxx-x-xxxxx-x")}</div>
-    <div style="display:flex;gap:10px">${inp("ph", "เบอร์โทร", ps.phone)}${inp("sd", "วันเริ่มงาน", ps.start_date, "date")}</div>
-    ${inp("sso", "หักประกันสังคม ต่อรอบ (บาท) — ใส่ 0 ถ้าไม่หัก", ps.sso || 0, "number")}
-    ${inp("nt", "หมายเหตุ", ps.note)}
-    <div class="btns"><button class="btn" id="piBack">กลับ</button><button class="btn pri" id="piSv">บันทึก</button></div>`);
-  $("#piBack").onclick = back;
-  $("#piSv").onclick = () => payAction(() => API.rpc("admin_pay_save_staff", { p_id: id, p_rate_type: ps.rate_type || "PT", p_full_name: $("#pi_fn").value, p_bank: $("#pi_bk").value, p_account_no: $("#pi_ac").value, p_phone: $("#pi_ph").value, p_start_date: $("#pi_sd").value || null, p_sso: Number($("#pi_sso").value) || 0, p_note: $("#pi_nt").value }), "บันทึกแล้ว", back);
-}
-
-function openPayRates() {
-  const C = S.pay.cfg; const T = C.types;
-  openSheet(`<h3>ตั้งค่าเรตค่าจ้าง</h3><p class="lead">บาทต่อกะ · มีผลกับการคำนวณทุกรอบ (รวมรอบเก่าที่เปิดดูใหม่)</p>
-    <div class="rtab"><table><thead><tr><th>กะ</th>${T.map(t => `<th>${esc(typeShort(t.code))}</th>`).join("")}</tr></thead><tbody>
-    ${PAY_COLS.map(([k, t]) => `<tr><td>${t}</td>${T.map(ty => `<td><input type="number" min="0" data-rt="${esc(ty.code)}" data-rk="${k}" value="${Number(C.rates[ty.code]?.[k] ?? 0)}"></td>`).join("")}</tr>`).join("")}
-    </tbody></table></div>
-    <h4 class="rt-h">ค่าปรับ / ค่าต่อหน่วย</h4>
-    <div class="rgrid">${[["late", "มาสาย (ต่อนาที)"], ["link", "ลืมแชร์ลิงก์ (ต่อครั้ง)"], ["sudden", "ลากะทันหัน (ต่อครั้ง)"], ["medcert", "ไม่ส่งใบรับรองแพทย์"], ["incomplete", "ทำงานไม่ครบตามตาราง"], ["tiktok", "TikTok Live (ต่อ ชม.)"]].map(([k, t]) => `<label class="field">${t}<input type="number" min="0" data-un="${k}" value="${Number(C.unit[k] || 0)}"></label>`).join("")}</div>
-    <h4 class="rt-h">เบี้ยขยัน (แนะนำในรอบ 16–สิ้นเดือน)</h4>
-    <div class="rgrid"><label class="field">ทำงานครบ (วัน/เดือน)<input type="number" min="1" id="bnD" value="${Number(C.bonus.days)}"></label><label class="field">ได้เบี้ยขยัน (บาท)<input type="number" min="0" id="bnA" value="${Number(C.bonus.amount)}"></label></div>
-    <div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn pri" id="rtSv">บันทึกเรต</button></div>`, "wide");
-  $("#rtSv").onclick = () => {
-    const v = JSON.parse(JSON.stringify(C));
-    document.querySelectorAll("[data-rt]").forEach(i => { (v.rates[i.dataset.rt] ||= {})[i.dataset.rk] = Number(i.value) || 0; });
-    document.querySelectorAll("[data-un]").forEach(i => { v.unit[i.dataset.un] = Number(i.value) || 0; });
-    v.bonus = { days: Number($("#bnD").value) || 26, amount: Number($("#bnA").value) || 0 };
-    payAction(() => API.rpc("admin_pay_set_config", { p_key: "rates", p_value: v }), "บันทึกเรตแล้ว", closeSheet);
+function prBindUpload() {
+  const b = $("#prUp"), f = $("#prFile"); if (!b || !f) return;
+  b.onclick = () => f.click();
+  f.onchange = async () => {
+    const file = f.files[0]; f.value = ""; if (!file) return;
+    b.disabled = true; const txt = b.textContent; b.textContent = "กำลังอ่านไฟล์…";
+    try {
+      await loadXLSX();
+      const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const sheets = wb.SheetNames.map(n => ({ name: n, aoa: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null, blankrows: true }) }));
+      const res = parsePayWorkbook(sheets, S.y);
+      if (!res.periods.length) throw new Error("ไม่พบแผ่นงานเงินเดือนในไฟล์ (ต้องมีหัวตาราง 'ชื่อเล่น' 'ยอดรวม' 'สรุปจ่ายค่าจ้าง')");
+      prConfirmImport(res, file.name);
+    } catch (e) { toast(e.message, "err"); }
+    finally { b.disabled = false; b.textContent = txt; }
   };
 }
 
-async function exportPaySlip() {
-  const btn = $("#payX"); btn.disabled = true; btn.textContent = "กำลังสร้างไฟล์…";
-  try {
-    await loadXLSX(); const P = S.pay; const L = P.calc; const r = P.r;
-    if (!L.length) throw new Error("ยังไม่มีข้อมูลในรอบนี้");
-    const E = XLSX.utils.encode_cell;
-    const head = ["ลำดับ", "เรตจ้าง", "ชื่อเล่น", "ชื่อ-นามสกุล", "ธนาคาร", "เลขบัญชี"];
-    PAY_COLS.forEach(([k, t]) => head.push(`${t} (จำนวน)`, `${t} (เรต)`));
-    const baseCol = head.length; head.push("ยอดรวมค่ากะ");
-    const plusStart = head.length; PAY_PLUS.forEach(k => head.push(PAY_KINDS[k].t));
-    const minusStart = head.length; PAY_MINUS.forEach(k => head.push(PAY_KINDS[k].t));
-    const netCol = head.length; head.push("สรุปจ่ายค่าจ้าง", "หมายเหตุ");
-    const ws = {}; const set = (R, Cc, cell) => { ws[E({ r: R, c: Cc })] = cell; };
-    set(0, 0, { t: "s", v: `เงินเดือนพนักงาน ไลฟ์ ประจำวันที่ ${r.title}` });
-    head.forEach((h, i) => set(1, i, { t: "s", v: h }));
-    L.forEach((p, i) => {
-      const R = i + 2; const rates = P.cfg.rates[p.type] || {};
-      [i + 1, typeShort(p.type), p.st.nickname, p.ps.full_name || "", p.ps.bank || "", p.ps.account_no || ""].forEach((v, c) => set(R, c, typeof v === "number" ? { t: "n", v } : { t: "s", v: String(v) }));
-      const parts = [];
-      PAY_COLS.forEach(([k], j) => { const c = 6 + j * 2; const n = p.counts[k] || 0; if (n) { set(R, c, { t: "n", v: n }); set(R, c + 1, { t: "n", v: Number(rates[k] || 0) }); } parts.push(`${E({ r: R, c })}*${E({ r: R, c: c + 1 })}`); });
-      set(R, baseCol, { t: "n", v: p.base, f: parts.join("+") });
-      const sumK = k => p.items.filter(it => it.kind === k).reduce((a, it) => a + Number(it.amount), 0);
-      PAY_PLUS.forEach((k, j) => { const v = sumK(k); if (v) set(R, plusStart + j, { t: "n", v }); });
-      PAY_MINUS.forEach((k, j) => { const v = sumK(k); if (v) set(R, minusStart + j, { t: "n", v }); });
-      const rng = (a, b) => `SUM(${E({ r: R, c: a })}:${E({ r: R, c: b })})`;
-      set(R, netCol, { t: "n", v: p.net, f: `${E({ r: R, c: baseCol })}+${rng(plusStart, minusStart - 1)}-${rng(minusStart, netCol - 1)}` });
-      const notes = [...p.items.filter(it => it.note).map(it => `${PAY_KINDS[it.kind]?.t}: ${it.note}`), ...p.entries.filter(e => e.nopay).map(e => `ไม่จ่าย ${shortDate(e.date)} ${e.sh.label}`)];
-      if (notes.length) set(R, netCol + 1, { t: "s", v: notes.join(" / ") });
-    });
-    const TR = L.length + 2; set(TR, 2, { t: "s", v: "รวม" });
-    for (const c of [baseCol, ...PAY_PLUS.map((_, j) => plusStart + j), ...PAY_MINUS.map((_, j) => minusStart + j), netCol]) {
-      const v = L.reduce((a, p, i) => a + Number((ws[E({ r: i + 2, c })] || {}).v || 0), 0); set(TR, c, { t: "n", v, f: `SUM(${E({ r: 2, c })}:${E({ r: TR - 1, c })})` });
-    }
-    ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: TR, c: netCol + 1 } });
-    ws["!cols"] = head.map((h, i) => ({ wch: i < 6 ? [6, 10, 12, 28, 12, 16][i] : i === netCol + 1 ? 40 : 11 }));
-    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }];
-    const det = []; L.forEach(p => p.entries.forEach(e => det.push({ "วันที่": e.date, "วัน": WD[parseD(e.date).wd], "ชื่อเล่น": p.st.nickname, "เรตจ้าง": typeShort(p.type),
-      "ช่อง / กะ": e.merged ? e.merged.map(m => `${m.ch.name} ${m.sh.label}`).join(" + ") : `${e.ch.name} ${e.sh.label}`, "คิดเป็น": e.code ? PAY_COL[e.code].t : "ไม่รู้จักเรต", "บาท": e.amt, "หมายเหตุ": [e.merged ? "รวม 05-08 + 08-17" : "", e.opt === "break" ? "พัก 1 ชม." : "", e.nopay ? "ไม่จ่าย" : ""].filter(Boolean).join(", ") })));
-    const its = []; L.forEach(p => p.items.forEach(it => its.push({ "ชื่อเล่น": p.st.nickname, "ประเภท": PAY_KINDS[it.kind]?.s > 0 ? "บวก" : "หัก", "รายการ": PAY_KINDS[it.kind]?.t || it.kind, "จำนวน": it.qty || "", "บาท": Number(it.amount), "หมายเหตุ": it.note || "" })));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "ใบเงินเดือน");
-    const w2 = XLSX.utils.json_to_sheet(det.length ? det : [{ "วันที่": "ไม่มีกะ" }]); w2["!cols"] = [12, 9, 12, 10, 34, 30, 8, 22].map(w => ({ wch: w })); XLSX.utils.book_append_sheet(wb, w2, "รายละเอียดกะ");
-    const w3 = XLSX.utils.json_to_sheet(its.length ? its : [{ "ชื่อเล่น": "ไม่มีรายการบวก/หัก" }]); w3["!cols"] = [12, 8, 26, 8, 10, 40].map(w => ({ wch: w })); XLSX.utils.book_append_sheet(wb, w3, "รายการบวก-หัก");
-    XLSX.writeFile(wb, `เงินเดือนไลฟ์_${r.from}_ถึง_${r.to}.xlsx`);
-    toast(`ดาวน์โหลดแล้ว ${L.length} คน · รวม ฿${baht(L.reduce((a, p) => a + p.net, 0))}`, "ok");
-  } catch (e) { toast(e.message, "err"); }
-  finally { btn.disabled = false; btn.textContent = "⬇ Excel ใบเงินเดือน"; }
+function prConfirmImport(res, fname) {
+  const have = new Map((S.prep?.list || []).map(p => [p.key, p]));
+  const P = res.periods; const off = P.reduce((a, p) => a + p.rows.filter(r => r.other).length, 0);
+  openSheet(`<h3>นำเข้าเงินเดือน</h3><p class="lead">${esc(fname)} · พบ ${P.length} รอบ ${P.reduce((a, p) => a + p.rows.length, 0)} แถว</p>
+    <div class="loglist" style="max-height:44vh">${[...P].reverse().map(p => { const old = have.get(p.key); const n = prSum(p.rows, "net"); const o = old ? prSum(old.rows, "net") : null;
+      return `<div class="itm" style="padding:8px 12px"><span class="itm-t">รอบ ${prLabel(p)}<small>${p.rows.length} คน · แผ่น "${esc(p.sheet)}"</small></span><span class="tnum" style="text-align:right">฿${baht(n)}<small style="display:block;font-size:11.5px;color:${old ? (o === n ? "var(--ink-3)" : "var(--pending)") : "var(--open)"}">${old ? (o === n ? "เหมือนเดิม" : "อัปเดต (เดิม ฿" + baht(o) + ")") : "ใหม่"}</small></span></div>`; }).join("")}</div>
+    ${res.skipped.length ? `<p class="note">ข้ามแผ่นที่ไม่ใช่รอบเงินเดือน: ${res.skipped.map(esc).join(", ")}</p>` : ""}
+    ${off ? `<p class="note" style="color:var(--pending)">มี ${off} แถวที่ยอดสรุปไม่ตรงกับ ค่ากะ+บวก−หัก — จะใช้ยอดสรุปจ่ายตามไฟล์</p>` : ""}
+    <p class="note">รอบที่มีอยู่แล้วจะถูกแทนที่ด้วยข้อมูลในไฟล์นี้ · ไม่มีการลบรอบอื่น</p>
+    <div class="btns"><button class="btn" data-close>ยกเลิก</button><button class="btn pri" id="prImp">บันทึก ${P.length} รอบ</button></div>`);
+  $("#prImp").onclick = async () => {
+    const btn = $("#prImp"); btn.disabled = true; btn.textContent = "กำลังบันทึก…";
+    try {
+      const payload = P.map(p => ({ key: p.key, d1: p.d1, d2: p.d2, sheet: p.sheet, title: p.title, rows: p.rows }));
+      await API.rpc("admin_pay_import", { p_periods: payload });
+      S.prKey = P.at(-1).key; await loadPayReports(); closeSheet(); toast(`นำเข้าแล้ว ${P.length} รอบ`, "ok"); if (S.tab === "pay") render();
+    } catch (e) { toast(e.message, "err"); btn.disabled = false; btn.textContent = `บันทึก ${P.length} รอบ`; }
+  };
 }
 
 /* ===== Sheet (modal) ===== */
 function openSheet(html, cls) {
-  const prevScroll = $("#scrim .sheet")?.scrollTop || 0; const same = cls && $("#scrim .sheet")?.dataset.cls === cls;
   closeSheet();
   const d = document.createElement("div"); d.className = "scrim"; d.id = "scrim";
-  d.innerHTML = `<div class="sheet ${cls || ""}" data-cls="${cls || ""}" role="dialog" aria-modal="true">${html}</div>`;
+  d.innerHTML = `<div class="sheet ${cls || ""}" role="dialog" aria-modal="true">${html}</div>`;
   d.addEventListener("click", e => { if (e.target === d || e.target.closest("[data-close]")) closeSheet(); });
   document.body.appendChild(d);
-  if (same && prevScroll) d.firstChild.scrollTop = prevScroll; else if (same) d.style.animation = "none";
 }
 function closeSheet() { const d = $("#scrim"); if (d) d.remove(); }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
